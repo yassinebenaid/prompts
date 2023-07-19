@@ -6,53 +6,87 @@ import (
 	"strings"
 )
 
+// Prints the message "m" in the specified style "s."
+// Perfect for short messages
 func Text(m string, s ...Style) {
 	fmt.Print(theme(s...), m, Reset)
 }
 
+// Prints the message "m" using the "INFO" theme for styling.
+// Perfect for short messages
 func Info(m string) {
-	fmt.Print(alert("INFO", m, BackgroundBlue))
+	fmt.Print(alert("INFO", m, BG_Blue))
 }
 
+// Prints the message "m" using the "ERROR" theme for styling.
+// Perfect for short messages
 func Error(m string) {
-	fmt.Print(alert("ERROR", m, BackgroundRed))
+	fmt.Print(alert("ERROR", m, BG_Red))
 }
 
+// Prints m styled by SUCCESS theme
 func Success(m string) {
-	fmt.Print(alert("SUCCESS", m, BackgroundGreen))
+	fmt.Print(alert("SUCCESS", m, BG_Green))
 }
 
+// Prints the message "m" using the "WARNING" theme for styling.
+// Perfect for short messages
 func Warning(m string) {
-	fmt.Print(alert("WARNING", m, BackgroundBrightYellow))
+	fmt.Print(alert("WARNING", m, BG_BrightYellow))
 }
 
+// Prints the message "m" labeled by "label" with the specified styles "s."
+// The "label" will be formatted according to the provided styles,
+// enhancing its visual appearance.
+func Hint(label string, m string, s ...Style) string {
+	t := string(Tab)
+	t += theme(s...)
+
+	return fmt.Sprint("\v", t, " ", label, " ", Reset, " ", m, "\v\n")
+
+}
+
+// Prints the message "m" using the "INFO" theme for styling.
+// Perfect for long messages
 func InfoMessage(m string) {
-	Message(m, BackgroundBlue)
+	Message(m, BG_Blue)
 }
 
+// Prints the message "m" using the "ERROR" theme for styling.
+// Perfect for long messages
 func ErrorMessage(m string) {
-	Message(m, BackgroundRed)
+	Message(m, BG_Red)
 }
 
+// Prints the message "m" using the "SUCCESS" theme for styling.
+// Perfect for long messages
 func SuccessMessage(m string) {
-	Message(m, BackgroundGreen)
+	Message(m, BG_Green)
 }
 
+// Prints the message "m" using the "WARNING" theme for styling.
+// Perfect for long messages
 func WarningMessage(m string) {
-	Message(m, BackgroundBrightYellow)
+	Message(m, BG_BrightYellow)
 }
 
+// Prints the message "m" in the specified style "s."
+// Perfect for long messages
 func Message(m string, s ...Style) {
 	t := theme(s...)
 
 	fmt.Print(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v")
 }
 
-func Ask(m string, styles ...Style) string {
+// Ask the user for an input and returns the result back
+//
+// prints m as label for the input with default styles,
+// you can customize the label styles using s
+func Ask(m string, s ...Style) string {
 	fmt.Print("\n", Tab)
 
-	if len(styles) > 0 {
-		fmt.Print(theme(styles...))
+	if len(s) > 0 {
+		fmt.Print(theme(s...))
 	} else {
 		fmt.Print(Bold)
 	}
@@ -62,11 +96,19 @@ func Ask(m string, styles ...Style) string {
 	return prompt()
 }
 
-func ConfirmDef(m string, def bool, styles ...Style) bool {
+// Ask the user for confirmation and returns the result back
+//
+// the user will have to type either yes or no , and the results will be as boolean
+//
+// you can choose a default value using def, it will be returned if the user types other words or if pressed enter
+//
+// prints m as label for the input with default styles,
+// you can customize the label styles using s
+func ConfirmDef(m string, def bool, s ...Style) bool {
 	fmt.Print("\n", Tab)
 
-	if len(styles) > 0 {
-		fmt.Print(theme(styles...))
+	if len(s) > 0 {
+		fmt.Print(theme(s...))
 	} else {
 		fmt.Print(Bold)
 	}
@@ -77,7 +119,7 @@ func ConfirmDef(m string, def bool, styles ...Style) bool {
 		d = "yes"
 	}
 
-	fmt.Print(m, Reset, Dim, " (yes/no) ", "[", Reset, TextYellow, d, Reset, Dim, "]", Reset, "\n")
+	fmt.Print(m, Reset, Dim, " (yes/no) ", "[", Reset, T_Yellow, d, Reset, Dim, "]", Reset, "\n")
 
 	res := prompt()
 
@@ -88,6 +130,15 @@ func ConfirmDef(m string, def bool, styles ...Style) bool {
 	return res == "yes"
 }
 
+// Ask the user for confirmation and returns the result back
+//
+// the user will have to type either yes or no to confirm  , other words or enter will keep showing the input
+// consider using ConfirmDef if you want to choose a default value
+//
+// you can choose a default value using def, it will be returned if the user types other words or if pressed enter
+//
+// prints m as label for the input with default styles,
+// you can customize the label styles using s
 func Confirm(m string, styles ...Style) bool {
 	fmt.Print("\n", Tab)
 
@@ -110,24 +161,30 @@ func Confirm(m string, styles ...Style) bool {
 	return res == "yes"
 }
 
+// Show a progress bar , this function should be called on a loop ,
+// its safe to be used in multiple goroutines
+//
+// you can choose show/hide the numeric percentage using prc
+//
+// each time you call it , it will updated the progress bar based on iteration
 func ProgressBar(iteration, total float64, prc bool) {
 	Progress(&ProgressStyle{
-		Total:      total,
-		Iteration:  iteration,
-		Prc:        prc,
-		Bar:        BackgroundBrightWhite,
-		Background: BackgroundBlack,
+		Total:           total,
+		Iteration:       iteration,
+		Prc:             prc,
+		BarColor:        BG_BrightWhite,
+		BackgroundColor: BG_Black,
 	})
 }
 
 type ProgressStyle struct {
-	Iteration  float64
-	Total      float64
-	Label      string
-	Prc        bool
-	LabelStyle []Style
-	Bar        Style
-	Background Style
+	Iteration       float64
+	Total           float64
+	Label           string
+	Prc             bool
+	LabelStyle      []Style
+	BarColor        Style
+	BackgroundColor Style
 }
 
 func (p *ProgressStyle) prc() int {
@@ -138,6 +195,13 @@ func (p *ProgressStyle) finished() bool {
 	return p.Iteration == p.Total
 }
 
+// Show a progress bar , this function should be called on a loop ,
+// its safe to be used in multiple goroutines
+//
+// you can choose show/hide the numeric percentage using prc
+//
+// Unlike ProgressBar which is usefull for simple progress bars
+// this function gives more flexibility to customize the bar as you need
 func Progress(s *ProgressStyle) error {
 
 	if s.Total == 0 {
@@ -157,7 +221,7 @@ func Progress(s *ProgressStyle) error {
 
 	filledLength := int(50 * s.Iteration / s.Total)
 
-	progress := strings.Repeat(string(s.Bar)+" "+string(Reset), filledLength) + strings.Repeat(string(s.Background)+" "+string(Reset), (50-filledLength))
+	progress := strings.Repeat(string(s.BarColor)+" "+string(Reset), filledLength) + strings.Repeat(string(s.BackgroundColor)+" "+string(Reset), (50-filledLength))
 
 	fmt.Printf("\r%s %s %s", label, progress, percent)
 
