@@ -121,8 +121,18 @@ func NewRouter() *Router {
 	}
 }
 
+type Route struct {
+	Flags   map[string]int
+	Args    []string
+	Options map[string]string
+}
+
 func getRoute(Args []string) Route {
-	var r = Route{}
+	var r = Route{
+		Flags:   make(map[string]int),
+		Args:    make([]string, 0, len(Args)),
+		Options: make(map[string]string),
+	}
 
 	flag := regexp.MustCompile(`^-[A-z0-9\-_]+$`)
 	opt := regexp.MustCompile(`^--[A-z0-9\-_]+=[A-z0-9\-_]+$`)
@@ -130,16 +140,12 @@ func getRoute(Args []string) Route {
 	for _, i := range Args {
 		switch true {
 		case flag.MatchString(i):
-			i = strings.TrimPrefix(i, "-")
-			fs := strings.Split(i, "")
+			fs := strings.Split(strings.TrimPrefix(i, "-"), "")
 
 			for _, f := range fs {
-				r.Flags = append(r.Flags, "-"+f)
+				r.Flags[f] = r.Flags[f] + 1
 			}
 		case opt.MatchString(i):
-			if r.Options == nil {
-				r.Options = make(map[string]string)
-			}
 			kv := strings.SplitN(i, "=", 2)
 			r.Options[kv[0]] = kv[1]
 		default:
@@ -150,23 +156,19 @@ func getRoute(Args []string) Route {
 	return r
 }
 
-type Route struct {
-	Flags   []string
-	Args    []string
-	Options map[string]string
+// determine wether f flag is present or not
+//
+// for example HasFlag("-h")
+func (r *Route) HasFlag(f string) bool {
+	_, ok := r.Flags[f]
+	return ok
 }
 
 // determine wether f flag is present or not
 //
 // for example HasFlag("-h")
-func (r *Route) HasFlag(f string) bool {
-	for _, i := range r.Flags {
-		if i == f {
-			return true
-		}
-	}
-
-	return false
+func (r *Route) GetFlagCount(f string) int {
+	return r.Flags[f]
 }
 
 // determine wether opt option is present or not
@@ -189,6 +191,11 @@ func (r *Route) GetOption(opt string) string {
 	}
 
 	return ""
+}
+
+// scan the option and seve it to dst
+func (r *Route) ScanOption(opt string, dst *string) {
+	*dst = r.Options[opt]
 }
 
 // Get an argument by its index , or "" if doesn't exists
