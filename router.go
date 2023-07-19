@@ -8,6 +8,7 @@ import (
 )
 
 type Router struct {
+	ran      bool
 	routes   map[string]func(Route) error
 	groups   map[string]func(*Router) *Router
 	fallback func(Route) error
@@ -45,7 +46,13 @@ func (r *Router) runFallBack() error {
 }
 
 func (r *Router) Run() error {
-	if len(os.Args) < 2 {
+	if r.ran {
+		return nil
+	}
+
+	r.ran = true
+
+	if len(r.Args) < 1 {
 		return r.runFallBack()
 	}
 
