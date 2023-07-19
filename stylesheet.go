@@ -1,8 +1,10 @@
 package goclitools
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -230,4 +232,34 @@ func Progress(s *ProgressStyle) error {
 	}
 
 	return nil
+}
+
+func alert(label string, m string, s ...Style) string {
+	t := string(Tab)
+	t += theme(s...)
+
+	return fmt.Sprint("\v", t, " ", label, " ", Reset, " ", m, "\v\n")
+}
+
+func prompt() string {
+	scanner := bufio.NewScanner(os.Stdin)
+
+	fmt.Print("➜  ")
+
+	if scanner.Scan() {
+		return scanner.Text()
+	}
+
+	return ""
+}
+
+func theme(s ...Style) string {
+	var theme string
+
+	for _, i := range s {
+		theme += fmt.Sprint(i)
+	}
+
+	return theme
+
 }

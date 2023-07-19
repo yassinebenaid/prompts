@@ -10,9 +10,10 @@ import (
 type Router struct {
 	ran       bool
 	routes    map[string]func(Route) error
-	groups    map[string]func(*Router) *Router
+	groups    map[string]func(*Router)
 	fallback  func(Route) error
 	arguments []string
+	err       error
 }
 
 // Adds new route to the router ,
@@ -23,7 +24,14 @@ func (r *Router) Add(prefix string, handler func(Route) error) *Router {
 		r.routes = make(map[string]func(Route) error)
 	}
 
-	r.routes[strings.TrimSpace(prefix)] = handler
+	prefix = strings.TrimSpace(prefix)
+
+	if !validPrefix(prefix) {
+		r.err = errors.New("router error : invalid prefix [" + prefix + "] , it should match [A-z0-9\\-\\_]")
+	} else {
+		r.routes[prefix] = handler
+	}
+
 	return r
 }
 
@@ -36,11 +44,19 @@ func (r *Router) Add(prefix string, handler func(Route) error) *Router {
 // for example `$ git origin ` has many sub routes (add,remove ...)
 //
 // handler recieves a Router instance to register your sub routes
-func (r *Router) Group(prefix string, handler func(*Router) *Router) *Router {
+func (r *Router) Group(prefix string, handler func(*Router)) *Router {
 	if r.groups == nil {
-		r.groups = make(map[string]func(*Router) *Router)
+		r.groups = make(map[string]func(*Router))
 	}
-	r.groups[strings.TrimSpace(prefix)] = handler
+
+	prefix = strings.TrimSpace(prefix)
+
+	if !validPrefix(prefix) {
+		r.err = errors.New("router error : invalid group prefix [" + prefix + "] , it should match [A-z0-9\\-\\_]")
+	} else {
+		r.groups[prefix] = handler
+	}
+
 	return r
 }
 
@@ -64,10 +80,13 @@ func (r *Router) runFallBack() error {
 //
 // if something went wrong , it returns why, or returns the error returned by the handler it self
 func (r *Router) Dispatch() error {
+	if r.err != nil {
+		return r.err
+	}
+
 	if r.ran {
 		return nil
 	}
-
 	r.ran = true
 
 	if len(r.arguments) < 1 {
@@ -77,13 +96,9 @@ func (r *Router) Dispatch() error {
 	g, ok := r.groups[r.arguments[0]]
 
 	if ok {
-		r := g(&Router{arguments: r.arguments[1:]})
-
-		if r != nil {
-			return r.Dispatch()
-		}
-
-		return nil
+		r2 := Router{arguments: r.arguments[1:]}
+		g(&r2)
+		return r2.Dispatch()
 	}
 
 	handler, ok := r.routes[r.arguments[0]]
@@ -181,4 +196,9 @@ func (r *Route) GetArg(index int) string {
 	}
 
 	return r.Args[index]
+}
+
+func validPrefix(p string) bool {
+	rx := regexp.MustCompile(`^[A-z0-9\-\_]+$`)
+	return rx.MatchString(p)
 }
