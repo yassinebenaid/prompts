@@ -130,7 +130,12 @@ func getRoute(Args []string) Route {
 	for _, i := range Args {
 		switch true {
 		case flag.MatchString(i):
-			r.Flags = append(r.Flags, i)
+			i = strings.TrimPrefix(i, "-")
+			fs := strings.Split(i, "")
+
+			for _, f := range fs {
+				r.Flags = append(r.Flags, "-"+f)
+			}
 		case opt.MatchString(i):
 			if r.Options == nil {
 				r.Options = make(map[string]string)
