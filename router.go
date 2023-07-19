@@ -79,6 +79,11 @@ func (r *Router) runFallBack() error {
 // Dispatch the router, reads the process args and invoke the convenience handler
 //
 // if something went wrong , it returns why, or returns the error returned by the handler it self
+//
+// this function should be called lastely , after its first call, the router become useless
+//
+// if this function invoked within a group, it does nothing
+// but returns early, this gives the router the chance to read all routes correctly
 func (r *Router) Dispatch() error {
 	if r.err != nil {
 		return r.err
@@ -96,8 +101,9 @@ func (r *Router) Dispatch() error {
 	g, ok := r.groups[r.arguments[0]]
 
 	if ok {
-		r2 := Router{arguments: r.arguments[1:]}
+		r2 := Router{arguments: r.arguments[1:], ran: true}
 		g(&r2)
+		r2.ran = false
 		return r2.Dispatch()
 	}
 
