@@ -9,7 +9,9 @@ import (
 
 type Router struct {
 	routes   map[string]func(Route) error
+	groups   map[string]func(*Router) *Router
 	fallback func(Route) error
+	Args     []string
 }
 
 func (r *Router) Add(route string, handler func(Route) error) *Router {
@@ -21,6 +23,14 @@ func (r *Router) Add(route string, handler func(Route) error) *Router {
 	return r
 }
 
+func (r *Router) Group(prefix string, group func(*Router) *Router) *Router {
+	if r.groups == nil {
+		r.groups = make(map[string]func(*Router) *Router)
+	}
+	r.groups[prefix] = group
+	return r
+}
+
 func (r *Router) Fallback(fallback func(Route) error) *Router {
 	r.fallback = fallback
 	return r
@@ -28,7 +38,7 @@ func (r *Router) Fallback(fallback func(Route) error) *Router {
 
 func (r *Router) runFallBack() error {
 	if r.fallback != nil {
-		return r.fallback(Route{})
+		return r.fallback(getRoute(r.Args))
 	}
 
 	return nil
@@ -39,41 +49,55 @@ func (r *Router) Run() error {
 		return r.runFallBack()
 	}
 
-	handler, ok := r.routes[os.Args[1]]
+	g, ok := r.groups[r.Args[0]]
 
 	if ok {
-		return handler(getRoute(os.Args[2:]))
+		r := g(&Router{Args: r.Args[1:]})
+
+		if r != nil {
+			return r.Run()
+		}
+
+		return nil
+	}
+
+	handler, ok := r.routes[r.Args[0]]
+
+	if ok {
+		return handler(getRoute(r.Args[1:]))
 	}
 
 	if r.fallback != nil {
 		return r.runFallBack()
 	}
 
-	return errors.New("undefined option : " + os.Args[1])
+	return errors.New("undefined option : " + r.Args[0])
 }
 
 func NewRouter() *Router {
-	return &Router{}
+	return &Router{
+		Args: os.Args[1:],
+	}
 }
 
-func getRoute(args []string) Route {
+func getRoute(Args []string) Route {
 	var r = Route{}
 
 	flag := regexp.MustCompile(`^-[A-z0-9\-_]+$`)
 	opt := regexp.MustCompile(`^--[A-z0-9\-_]+=[A-z0-9\-_]+$`)
 
-	for _, i := range args {
+	for _, i := range Args {
 		switch true {
 		case flag.MatchString(i):
-			r.flags = append(r.flags, i)
+			r.Flags = append(r.Flags, i)
 		case opt.MatchString(i):
-			if r.options == nil {
-				r.options = make(map[string]string)
+			if r.Options == nil {
+				r.Options = make(map[string]string)
 			}
 			kv := strings.SplitN(i, "=", 2)
-			r.options[kv[0]] = kv[1]
+			r.Options[kv[0]] = kv[1]
 		default:
-			r.args = append(r.args, i)
+			r.Args = append(r.Args, i)
 		}
 	}
 
@@ -81,13 +105,13 @@ func getRoute(args []string) Route {
 }
 
 type Route struct {
-	flags   []string
-	args    []string
-	options map[string]string
+	Flags   []string
+	Args    []string
+	Options map[string]string
 }
 
 func (r *Route) HasFlag(f string) bool {
-	for _, i := range r.flags {
+	for _, i := range r.Flags {
 		if i == f {
 			return true
 		}
@@ -97,13 +121,13 @@ func (r *Route) HasFlag(f string) bool {
 }
 
 func (r *Route) HasOption(opt string) bool {
-	_, ok := r.options[opt]
+	_, ok := r.Options[opt]
 
 	return ok
 }
 
 func (r *Route) GetOption(opt string) string {
-	v, ok := r.options[opt]
+	v, ok := r.Options[opt]
 
 	if ok {
 		return v
@@ -112,14 +136,11 @@ func (r *Route) GetOption(opt string) string {
 	return ""
 }
 
-func (r *Route) GetArgs() []string {
-	return r.args
-}
-
 func (r *Route) GetArg(index int) string {
-	if len(r.args) < index {
+
+	if len(r.Args)-1 < index {
 		return ""
 	}
 
-	return r.args[index]
+	return r.Args[index]
 }
