@@ -91,9 +91,9 @@ func (r *Context) ScanOption(opt string, dst *string) {
 // this functions returns all args that are not a flag , and not options
 func (r *Context) GetArg(index int) string {
 
-	if len(r.Args)-1 < index {
+	if len(r.Args) < index || index < 1 {
 		return ""
 	}
 
-	return r.Args[index]
+	return r.Args[index-1]
 }

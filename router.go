@@ -20,19 +20,7 @@ type Router struct {
 // prefix is the first value after the program name ,
 // if Add called in a group , prefix is the first value after the group prefix
 func (r *Router) Add(prefix string, handler func(*Context)) *Router {
-	if r.routes == nil {
-		r.routes = make(map[string]Route)
-	}
-
-	prefix = strings.TrimSpace(prefix)
-
-	if !validPrefix(prefix) {
-		r.err = errors.New("router error : invalid prefix [" + prefix + "] , it should match [A-z0-9\\-\\_]")
-	} else {
-		r.routes[prefix] = Route{prefix: prefix, Handler: handler}
-	}
-
-	return r
+	return r.AddRoute(prefix, Route{prefix: prefix, Handler: handler})
 }
 
 // Adds new route to the router ,
@@ -46,10 +34,10 @@ func (r *Router) AddRoute(prefix string, route Route) *Router {
 	prefix = strings.TrimSpace(prefix)
 
 	if !validPrefix(prefix) {
-		r.err = errors.New("router error : invalid prefix [" + prefix + "] , it should match [A-z0-9\\-\\_]")
+		r.err = errors.New(" invalid prefix [" + prefix + "] , it should match [A-z0-9\\-\\_]")
 	} else {
 		if route.Handler == nil {
-			r.err = errors.New("router error : handler cannot be nil for route [" + prefix + "]")
+			r.err = errors.New("handler cannot be nil for route [" + prefix + "]")
 		} else {
 			route.prefix = prefix
 			r.routes[prefix] = route
