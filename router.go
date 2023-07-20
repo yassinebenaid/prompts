@@ -19,7 +19,26 @@ type Router struct {
 // Adds new route to the router ,
 // prefix is the first value after the program name ,
 // if Add called in a group , prefix is the first value after the group prefix
-func (r *Router) Add(prefix string, route Route) *Router {
+func (r *Router) Add(prefix string, handler func(*Context)) *Router {
+	if r.routes == nil {
+		r.routes = make(map[string]Route)
+	}
+
+	prefix = strings.TrimSpace(prefix)
+
+	if !validPrefix(prefix) {
+		r.err = errors.New("router error : invalid prefix [" + prefix + "] , it should match [A-z0-9\\-\\_]")
+	} else {
+		r.routes[prefix] = Route{prefix: prefix, Handler: handler}
+	}
+
+	return r
+}
+
+// Adds new route to the router ,
+// prefix is the first value after the program name ,
+// if Add called in a group , prefix is the first value after the group prefix
+func (r *Router) AddRoute(prefix string, route Route) *Router {
 	if r.routes == nil {
 		r.routes = make(map[string]Route)
 	}
