@@ -1,10 +1,8 @@
 package goclitools
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 )
 
@@ -79,89 +77,6 @@ func PrintMessage(m string, s ...Style) {
 	fmt.Print(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v")
 }
 
-// Ask the user for an input and returns the result back
-//
-// prints m as label for the input with default styles,
-// you can customize the label styles using s
-func Ask(m string, s ...Style) string {
-	fmt.Print("\n", Tab)
-
-	if len(s) > 0 {
-		fmt.Print(theme(s...))
-	} else {
-		fmt.Print(Bold)
-	}
-
-	fmt.Print(m, Reset, "\n")
-
-	return prompt()
-}
-
-// Ask the user for confirmation and returns the result back
-//
-// the user will have to type either yes or no , and the results will be as boolean
-//
-// you can choose a default value using def, it will be returned if the user types other words or if pressed enter
-//
-// prints m as label for the input with default styles,
-// you can customize the label styles using s
-func ConfirmDef(m string, def bool, s ...Style) bool {
-	fmt.Print("\n", Tab)
-
-	if len(s) > 0 {
-		fmt.Print(theme(s...))
-	} else {
-		fmt.Print(Bold)
-	}
-
-	d := "no"
-
-	if def {
-		d = "yes"
-	}
-
-	fmt.Print(m, Reset, Dim, " (yes/no) ", "[", Reset, T_Yellow, d, Reset, Dim, "]", Reset, "\n")
-
-	res := prompt()
-
-	if res != "yes" && res != "no" {
-		res = d
-	}
-
-	return res == "yes"
-}
-
-// Ask the user for confirmation and returns the result back
-//
-// the user will have to type either yes or no to confirm  , other words or enter will keep showing the input
-// consider using ConfirmDef if you want to choose a default value
-//
-// you can choose a default value using def, it will be returned if the user types other words or if pressed enter
-//
-// prints m as label for the input with default styles,
-// you can customize the label styles using s
-func Confirm(m string, styles ...Style) bool {
-	fmt.Print("\n", Tab)
-
-	if len(styles) > 0 {
-		for _, i := range styles {
-			fmt.Print(i)
-		}
-	} else {
-		fmt.Print(Bold)
-	}
-
-	fmt.Print(m, Reset, Dim, " (yes/no) ", Reset, "\n")
-
-	var res string
-
-	for res != "yes" && res != "no" {
-		res = prompt()
-	}
-
-	return res == "yes"
-}
-
 // Show a progress bar , this function should be called on a loop ,
 // its safe to be used in multiple goroutines
 //
@@ -233,18 +148,6 @@ func Progress(s *ProgressStyle) error {
 	return nil
 }
 
-func prompt() string {
-	scanner := bufio.NewScanner(os.Stdin)
-
-	fmt.Print("➜  ")
-
-	if scanner.Scan() {
-		return scanner.Text()
-	}
-
-	return ""
-}
-
 func theme(s ...Style) string {
 	var theme string
 
@@ -255,20 +158,3 @@ func theme(s ...Style) string {
 	return theme
 
 }
-func ClearTrm(lines int) {
-	fmt.Print(Clear)
-	for i := 0; i < lines; i++ {
-		fmt.Print(UP, Clear)
-	}
-	fmt.Print(Reset)
-}
-
-// func Select(options map[int]string) int {
-// 	if len(options) < 1 {
-// 		return 0
-// 	}
-
-// 	selected := 0
-
-// 	return selected
-// }
