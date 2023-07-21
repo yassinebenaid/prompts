@@ -10,71 +10,70 @@ import (
 
 // Prints the message "m" in the specified style "s."
 // Perfect for short messages
-func Text(m string, s ...Style) {
+func Print(m string, s ...Style) {
 	fmt.Print(theme(s...), m, Reset)
 }
 
 // Prints the message "m" using the "INFO" theme for styling.
 // Perfect for short messages
 func Info(m string) {
-	fmt.Print(alert("INFO", m, BG_Blue))
+	Alert("INFO", m, BG_Blue)
 }
 
 // Prints the message "m" using the "ERROR" theme for styling.
 // Perfect for short messages
 func Error(m string) {
-	fmt.Print(alert("ERROR", m, BG_Red))
+	Alert("ERROR", m, BG_Red)
 }
 
 // Prints m styled by SUCCESS theme
 func Success(m string) {
-	fmt.Print(alert("SUCCESS", m, BG_Green))
+	Alert("SUCCESS", m, BG_Green)
 }
 
 // Prints the message "m" using the "WARNING" theme for styling.
 // Perfect for short messages
 func Warning(m string) {
-	fmt.Print(alert("WARNING", m, BG_BrightYellow))
+	Alert("WARNING", m, BG_BrightYellow)
 }
 
 // Prints the message "m" labeled by "label" with the specified styles "s."
 // The "label" will be formatted according to the provided styles,
 // enhancing its visual appearance.
-func Hint(label string, m string, s ...Style) string {
+func Alert(label string, m string, s ...Style) {
 	t := string(Tab)
 	t += theme(s...)
 
-	return fmt.Sprint("\v", t, " ", label, " ", Reset, " ", m, "\v\n")
-
+	fmt.Print("\v", t, " ", label, " ", Reset, " ", m, "\v\n")
 }
 
 // Prints the message "m" using the "INFO" theme for styling.
 // Perfect for long messages
 func InfoMessage(m string) {
-	Message(m, BG_Blue)
+	PrintMessage(m, BG_Blue)
 }
 
 // Prints the message "m" using the "ERROR" theme for styling.
 // Perfect for long messages
 func ErrorMessage(m string) {
-	Message(m, BG_Red)
+	PrintMessage(m, BG_Red)
 }
 
 // Prints the message "m" using the "SUCCESS" theme for styling.
 // Perfect for long messages
 func SuccessMessage(m string) {
-	Message(m, BG_Green)
+	PrintMessage(m, BG_Green)
 }
 
 // Prints the message "m" using the "WARNING" theme for styling.
 // Perfect for long messages
 func WarningMessage(m string) {
-	Message(m, BG_BrightYellow)
+	PrintMessage(m, BG_BrightYellow)
 }
 
 // Prints the message "m" in the specified style "s."
 // Perfect for long messages
-func Message(m string, s ...Style) {
+func PrintMessage(m string, s ...Style) {
 	t := theme(s...)
 
 	fmt.Print(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v")
@@ -234,13 +233,6 @@ func Progress(s *ProgressStyle) error {
 	return nil
 }
 
-func alert(label string, m string, s ...Style) string {
-	t := string(Tab)
-	t += theme(s...)
-
-	return fmt.Sprint("\v", t, " ", label, " ", Reset, " ", m, "\v\n")
-}
-
 func prompt() string {
 	scanner := bufio.NewScanner(os.Stdin)
 
@@ -263,3 +255,20 @@ func theme(s ...Style) string {
 	return theme
 
 }
+func ClearTrm(lines int) {
+	fmt.Print(Clear)
+	for i := 0; i < lines; i++ {
+		fmt.Print(UP, Clear)
+	}
+	fmt.Print(Reset)
+}
+
+// func Select(options map[int]string) int {
+// 	if len(options) < 1 {
+// 		return 0
+// 	}
+
+// 	selected := 0
+
+// 	return selected
+// }

@@ -56,5 +56,7 @@ const (
 	BG_BrightCyan    Style = "\033[106m"
 	BG_BrightWhite   Style = "\033[107m"
 
-	Tab Style = "  "
+	Tab   Style = "  "
+	UP    Style = "\x1b[1A"
+	Clear Style = "\x1b[2K"
 )
