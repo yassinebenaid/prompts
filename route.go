@@ -8,7 +8,7 @@ type Route struct {
 	prefix  string
 	Flags   []string
 	Args    int
-	Options []string
+	LFlags  []string
 	Handler func(*Context)
 }
 
@@ -29,7 +29,7 @@ func (r *Route) match(c *Context) error {
 		return err
 	}
 
-	err = r.matchOptions(c)
+	err = r.matchLFlags(c)
 
 	if err != nil {
 		return err
@@ -39,9 +39,9 @@ func (r *Route) match(c *Context) error {
 }
 
 func (r *Route) matchFlags(c *Context) error {
-	if len(r.Flags) == 0 && len(c.Flags) > len(r.Flags) {
+	if len(r.Flags) == 0 && len(c.Flags) != 0 {
 		return RouteErr{
-			message: fmt.Sprintf("command [%s] does not accept flags,", r.prefix),
+			message: fmt.Sprintf("command [%s] does not expect flags,", r.prefix),
 		}
 	}
 
@@ -66,15 +66,15 @@ func (r *Route) matchFlags(c *Context) error {
 	return nil
 }
 
-func (r *Route) matchOptions(c *Context) error {
-	if len(r.Options) == 0 && len(c.Options) > len(r.Options) {
+func (r *Route) matchLFlags(c *Context) error {
+	if len(r.LFlags) == 0 && len(c.LFlags) != 0 {
 		return RouteErr{
-			message: fmt.Sprintf("command [%s] does not accept options,", r.prefix),
+			message: fmt.Sprintf("command [%s] does not expect flags,", r.prefix),
 		}
 	}
 
 	exists := func(f string) bool {
-		for _, f2 := range r.Options {
+		for _, f2 := range r.LFlags {
 			if f == f2 {
 				return true
 			}
@@ -82,10 +82,10 @@ func (r *Route) matchOptions(c *Context) error {
 		return false
 	}
 
-	for k := range c.Options {
+	for k := range c.LFlags {
 		if !exists(k) {
 			return RouteErr{
-				message: fmt.Sprintf("option [%s] does not exists", k),
+				message: fmt.Sprintf("flag [%s] does not exists", k),
 			}
 		}
 	}

@@ -117,8 +117,7 @@ func (r *Router) Dispatch() error {
 	route, ok := r.routes[r.arguments[0]]
 
 	if ok {
-		r.dispatchHandler(route)
-		return nil
+		return r.dispatchHandler(route)
 	}
 
 	if r.fallback != nil {

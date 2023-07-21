@@ -6,16 +6,16 @@ import (
 )
 
 type Context struct {
-	Flags   map[string]int
-	Args    []string
-	Options map[string]string
+	Flags  map[string]int
+	LFlags map[string]string
+	Args   []string
 }
 
 func getContext(Args []string) *Context {
 	var ctx = Context{
-		Flags:   make(map[string]int),
-		Args:    make([]string, 0, len(Args)),
-		Options: make(map[string]string),
+		Flags:  make(map[string]int),
+		Args:   make([]string, 0, len(Args)),
+		LFlags: make(map[string]string),
 	}
 
 	flag := regexp.MustCompile(`^-[A-z0-9]+$`)
@@ -32,9 +32,9 @@ func getContext(Args []string) *Context {
 		case opt.MatchString(i):
 			kv := strings.SplitN(i, "=", 2)
 			if len(kv) == 2 {
-				ctx.Options[kv[0]] = kv[1]
+				ctx.LFlags[kv[0]] = kv[1]
 			} else {
-				ctx.Options[kv[0]] = ""
+				ctx.LFlags[kv[0]] = ""
 			}
 		default:
 			ctx.Args = append(ctx.Args, i)
@@ -59,20 +59,20 @@ func (r *Context) GetFlagCount(f string) int {
 	return r.Flags[f]
 }
 
-// determine wether opt option is present or not
+// determine wether l long flag is present or not
 //
-// for example HasOption("--help")
-func (r *Context) HasOption(opt string) bool {
-	_, ok := r.Options[opt]
+// for example HasLFlag("--help")
+func (r *Context) HasLFlag(l string) bool {
+	_, ok := r.LFlags[l]
 
 	return ok
 }
 
-// get an option value
+// get a long flag value
 //
-// for example , in case of "--path=some/path/here" , GetOption("--path") returns "/some/path/here"
-func (r *Context) GetOption(opt string) string {
-	v, ok := r.Options[opt]
+// for example , in case of "--lflag=something" , GetLFlag("--lflag") returns "something"
+func (r *Context) GetLFlag(l string) string {
+	v, ok := r.LFlags[l]
 
 	if ok {
 		return v
@@ -81,14 +81,14 @@ func (r *Context) GetOption(opt string) string {
 	return ""
 }
 
-// scan the option and seve it to dst
-func (r *Context) ScanOption(opt string, dst *string) {
-	*dst = r.Options[opt]
+// scan the long flag to dst
+func (r *Context) ScanLflag(l string, dst *string) {
+	*dst = r.LFlags[l]
 }
 
 // Get an argument by its index , or "" if doesn't exists
 //
-// this functions returns all args that are not a flag , and not options
+// this functions execluds the flags
 func (r *Context) GetArg(index int) string {
 
 	if len(r.Args) < index || index < 1 {
