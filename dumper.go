@@ -49,17 +49,31 @@ func dumpStrSlice(s []string) {
 	PrintRGB("]\n", 150, 90, 10)
 }
 
-// func dumpStrSlice2(s []string) {
-// 	Print(fmt.Sprintf("[]int:%d {\n", len(s)), T_Blue)
-// 	for _, v := range s {
-// 		fmt.Print("   ")
-// 		dumpString(v)
-// 		Print(": ", T_BrightBlack)
-// 		dumpString(v)
-// 		fmt.Println()
-// 	}
-// 	Print("}\n", T_Blue)
-// }
+func dumpNumStrMap[N Num](s map[N]string) {
+	fmt.Print(typeString(s, fmt.Sprintf(":%d", len(s))))
+	PrintRGB(" [\n", 150, 90, 10)
+	for k, v := range s {
+		fmt.Print("   ")
+		dumpNumber[N](k)
+		PrintRGB(": ", 150, 90, 10)
+		dumpString(v)
+		fmt.Println()
+	}
+	PrintRGB("]\n", 150, 90, 10)
+}
+
+func dumpStrNumMap[N Num](s map[string]N) {
+	fmt.Print(typeString(s, fmt.Sprintf(":%d", len(s))))
+	PrintRGB(" [\n", 150, 90, 10)
+	for k, v := range s {
+		fmt.Print("   ")
+		dumpString(k)
+		PrintRGB(": ", 150, 90, 10)
+		dumpNumber[N](v)
+		fmt.Println()
+	}
+	PrintRGB("]\n", 150, 90, 10)
+}
 
 func getfl(skip int) string {
 	_, f, l, ok := runtime.Caller(skip)
@@ -133,6 +147,54 @@ func dump(value any) {
 		dumpNumSlice[complex128](value)
 	case []string:
 		dumpStrSlice(value)
+	case map[int]string:
+		dumpNumStrMap[int](value)
+	case map[int8]string:
+		dumpNumStrMap[int8](value)
+	case map[int16]string:
+		dumpNumStrMap[int16](value)
+	case map[uint]string:
+		dumpNumStrMap[uint](value)
+	case map[uint8]string:
+		dumpNumStrMap[uint8](value)
+	case map[uint16]string:
+		dumpNumStrMap[uint16](value)
+	case map[uint32]string:
+		dumpNumStrMap[uint32](value)
+	case map[uint64]string:
+		dumpNumStrMap[uint64](value)
+	case map[float32]string:
+		dumpNumStrMap[float32](value)
+	case map[float64]string:
+		dumpNumStrMap[float64](value)
+	case map[complex64]string:
+		dumpNumStrMap[complex64](value)
+	case map[complex128]string:
+		dumpNumStrMap[complex128](value)
+	case map[string]int:
+		dumpStrNumMap[int](value)
+	case map[string]int8:
+		dumpStrNumMap[int8](value)
+	case map[string]int16:
+		dumpStrNumMap[int16](value)
+	case map[string]uint:
+		dumpStrNumMap[uint](value)
+	case map[string]uint8:
+		dumpStrNumMap[uint8](value)
+	case map[string]uint16:
+		dumpStrNumMap[uint16](value)
+	case map[string]uint32:
+		dumpStrNumMap[uint32](value)
+	case map[string]uint64:
+		dumpStrNumMap[uint64](value)
+	case map[string]float32:
+		dumpStrNumMap[float32](value)
+	case map[string]float64:
+		dumpStrNumMap[float64](value)
+	case map[string]complex64:
+		dumpStrNumMap[complex64](value)
+	case map[string]complex128:
+		dumpStrNumMap[complex128](value)
 	}
 }
 
