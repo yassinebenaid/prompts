@@ -3,6 +3,7 @@ package goclitools
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -10,6 +11,12 @@ import (
 // Perfect for short messages
 func Print(m string, s ...Style) {
 	fmt.Print(theme(s...), m, Reset)
+}
+
+// Return the message "m" in the specified style "s."
+// Perfect for short messages
+func Sprint(m string, s ...Style) string {
+	return fmt.Sprint(theme(s...), m, Reset)
 }
 
 // Prints the message "m" using the "INFO" theme for styling.
@@ -77,6 +84,13 @@ func PrintMessage(m string, s ...Style) {
 	fmt.Print(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v")
 }
 
+// Prints the message "m" in the specified style "s."
+// Perfect for long messages
+func SprintMessage(m string, s ...Style) string {
+	t := theme(s...)
+	return fmt.Sprint(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v")
+}
+
 // Show a progress bar , this function should be called on a loop ,
 // its safe to be used in multiple goroutines
 //
@@ -96,11 +110,12 @@ func ProgressBar(iteration, total float64, prc bool) {
 type ProgressStyle struct {
 	Iteration       float64
 	Total           float64
-	Label           string
+	Prefix          string
+	Suffix          string
 	Prc             bool
-	LabelStyle      []Style
 	BarColor        Style
 	BackgroundColor Style
+	Width           int
 }
 
 func (p *ProgressStyle) prc() int {
@@ -119,27 +134,34 @@ func (p *ProgressStyle) finished() bool {
 // Unlike ProgressBar which is usefull for simple progress bars
 // this function gives more flexibility to customize the bar as you need
 func Progress(s *ProgressStyle) error {
-
 	if s.Total == 0 {
 		return errors.New("invalid total value , total should be greater than 0")
 	}
 
 	var percent string
-	var label string
+
+	if s.Width < 1 {
+		s.Width = getTrmW() - 2
+	}
 
 	if s.Prc {
 		percent = fmt.Sprintf("%d%%", s.prc())
+		s.Width -= 6
 	}
 
-	if s.Label != "" {
-		label = theme(s.LabelStyle...) + s.Label + string(Reset)
+	if s.Prefix != "" {
+		s.Width -= charWidth(s.Prefix)
 	}
 
-	filledLength := int(50 * s.Iteration / s.Total)
+	if s.Suffix != "" {
+		s.Width -= charWidth(s.Suffix)
+	}
 
-	progress := strings.Repeat(string(s.BarColor)+" "+string(Reset), filledLength) + strings.Repeat(string(s.BackgroundColor)+" "+string(Reset), (50-filledLength))
+	filledLength := int(float64(s.Width) * s.Iteration / s.Total)
 
-	fmt.Printf("\r%s %s %s", label, progress, percent)
+	progress := strings.Repeat(string(s.BarColor)+" "+string(Reset), filledLength) + strings.Repeat(string(s.BackgroundColor)+" "+string(Reset), (int(s.Width)-filledLength))
+
+	fmt.Printf("\r%s %s %s %s", s.Prefix, progress, percent, s.Suffix)
 
 	if s.finished() {
 		fmt.Println()
@@ -156,5 +178,9 @@ func theme(s ...Style) string {
 	}
 
 	return theme
+}
 
+func charWidth(m string) int {
+	r := regexp.MustCompile(`\x1b\[([^m]+)m`)
+	return len(r.ReplaceAll([]byte(m), []byte("")))
 }

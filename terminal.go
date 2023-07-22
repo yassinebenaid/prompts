@@ -8,8 +8,13 @@ import (
 	"golang.org/x/term"
 )
 
-// clear the terminal .
+// clear the terminal . lines represents how many line to earase ,
+// if lines = -1 clear all visible lines , like when you click CTRL+L
 func ClearTrm(lines int) {
+	if lines < 0 {
+		_, lines, _ = term.GetSize(int(os.Stdin.Fd()))
+	}
+
 	fmt.Print(Clear)
 	for i := 0; i < lines; i++ {
 		fmt.Print(UP, Clear)
@@ -144,4 +149,13 @@ func prompt() string {
 	}
 
 	return ""
+}
+
+func getTrmW() int {
+	w, _, _ := term.GetSize(int(os.Stdin.Fd()))
+	return w
+}
+func getTrmH() int {
+	_, h, _ := term.GetSize(int(os.Stdin.Fd()))
+	return h
 }
