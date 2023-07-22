@@ -15,11 +15,11 @@ func ClearTrm(lines int) {
 		_, lines, _ = term.GetSize(int(os.Stdin.Fd()))
 	}
 
-	fmt.Print(Clear)
+	fmt.Print(Earase)
 	for i := 0; i < lines; i++ {
-		fmt.Print(UP, Clear)
+		fmt.Print(UP, Earase)
 	}
-	fmt.Print(Reset)
+	fmt.Print(Reset, "\r")
 }
 
 func Select(options map[int]string) int {

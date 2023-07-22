@@ -52,6 +52,18 @@ func Alert(label string, m string, s ...Style) {
 	fmt.Print("\v", t, " ", label, " ", Reset, " ", m, "\v\n")
 }
 
+// print the message "m" in the specified "r" "g" "b" color
+func PrintRGB(m string, r int, g int, b int) {
+	t := fmt.Sprintf("\x1b[38;2;%d;%d;%dm", r, g, b)
+	fmt.Print(t, m, Reset)
+}
+
+// print the message "m" in the specified "r" "g" "b" color
+func SprintRGB(m string, r int, g int, b int) string {
+	t := fmt.Sprintf("\x1b[38;2;%d;%d;%dm", r, g, b)
+	return fmt.Sprint(t, m, Reset)
+}
+
 // Prints the message "m" using the "INFO" theme for styling.
 // Perfect for long messages
 func InfoMessage(m string) {
@@ -88,6 +100,18 @@ func PrintMessage(m string, s ...Style) {
 // Perfect for long messages
 func SprintMessage(m string, s ...Style) string {
 	t := theme(s...)
+	return fmt.Sprint(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v")
+}
+
+// print the message "m" in the specified "r" "g" "b" background
+func PrintRGBMessage(m string, r int, g int, b int) {
+	t := fmt.Sprintf("\x1b[48;2;%d;%d;%dm", r, g, b)
+	fmt.Print(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v")
+}
+
+// print the message "m" in the specified "r" "g" "b" background
+func SprintRGBMessage(m string, r int, g int, b int) string {
+	t := fmt.Sprintf("\x1b[48;2;%d;%d;%dm", r, g, b)
 	return fmt.Sprint(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v")
 }
 
