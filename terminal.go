@@ -12,7 +12,7 @@ import (
 // if lines = -1 clear all visible lines , like when you click CTRL+L
 func ClearTrm(lines int) {
 	if lines < 0 {
-		_, lines, _ = term.GetSize(int(os.Stdin.Fd()))
+		lines = getTrmH()
 	}
 
 	fmt.Print(Earase)
