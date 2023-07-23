@@ -32,8 +32,15 @@ func NewRouter() *Router {
 // Adds new handler to the router ,
 // prefix is the first value after the program name ,
 // if Add called in a group , prefix is the first value after the group prefix
-func (r *Router) Add(prefix string, handler func(*Context)) *Router {
-	return r.AddRoute(prefix, &Route{prefix: prefix, Handler: handler})
+func (r *Router) Add(schema string, handler func(*Context)) *Router {
+	route := Route{}
+
+	if err := route.parseSchema(schema); err != nil {
+		r.err = err
+	}
+
+	return r
+	// return r.AddRoute(schema, &Route{prefix: prefix, Handler: handler})
 }
 
 // Adds new route to the router ,

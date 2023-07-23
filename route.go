@@ -2,12 +2,17 @@ package goclitools
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 )
 
 type Route struct {
+	schema  string
+	regex   string
 	prefix  string
 	Flags   []string
 	Args    int
+	vars    map[string]string
 	LFlags  []string
 	Handler func(*Context)
 }
@@ -91,4 +96,72 @@ func (r *Route) matchLFlags(c *Context) error {
 	}
 
 	return nil
+}
+
+func (r *Route) parseSchema(schema string) error {
+	schema = sanitize(schema)
+
+	if !validSchema(schema) {
+		return fmt.Errorf("incorrect schema syntax : %s", schema)
+	}
+
+	r.prefix = strings.SplitN(schema, " ", 2)[0]
+	r.schema = schema
+	r.splitUp(schema)
+
+	return nil
+}
+
+func validSchema(schema string) bool {
+	rx := regexp.MustCompile(`^[a-z0-9]+(\s+\{[a-z\_]+\??\})*(\s+\[-{1,2}[A-z\-]+(\s-{1,2}[A-z\-]+)*\])*(\s+\{[a-z\_]+\??\})*$`)
+
+	return rx.MatchString(schema)
+}
+
+func sanitize(s string) string {
+	s = regexp.MustCompile(`\s{2,}`).ReplaceAllString(s, " ")
+	s = strings.TrimSpace(s)
+	return s
+}
+
+func (r *Route) splitUp(schema string) {
+	if r.vars == nil {
+		r.vars = make(map[string]string)
+	}
+
+	schema = regexp.MustCompile(`\{[a-z\_]+\??\}`).ReplaceAllStringFunc(schema, func(s string) string {
+		s = strings.TrimLeft(s, "{")
+		s = strings.TrimRight(s, "}")
+
+		if strings.HasSuffix(s, "?") {
+			s = strings.TrimRight(s, "?")
+			r.vars[s] = ""
+			return `[^\s]*`
+		}
+
+		r.vars[s] = ""
+
+		return `[^\s]+`
+	})
+
+	schema = regexp.MustCompile(`\[(\s*-{1,2}[A-z]+)+\]`).ReplaceAllStringFunc(schema, func(s string) string {
+		s = strings.TrimLeft(s, "[")
+		s = strings.TrimRight(s, "]")
+		fields := strings.Fields(s)
+		parts := make([]string, 0)
+
+		for _, f := range fields {
+			if strings.HasPrefix(f, "--") {
+				r.LFlags = append(r.LFlags, f)
+				parts = append(parts, f+`(=[^\s=]+)?`)
+			} else {
+				r.Flags = append(r.Flags, f)
+				parts = append(parts, f)
+			}
+		}
+
+		return `(\s*(` + strings.Join(parts, `|`) + `)+\s*)*`
+	})
+
+	r.regex = "^" + schema + "$"
 }
