@@ -33,14 +33,14 @@ func NewRouter() *Router {
 // prefix is the first value after the program name ,
 // if Add called in a group , prefix is the first value after the group prefix
 func (r *Router) Add(schema string, handler func(*Context)) *Router {
-	route := Route{}
+	route := Route{Handler: handler}
 
 	if err := route.parseSchema(schema); err != nil {
 		r.err = err
 	}
 
+	r.routes[route.prefix] = &route
 	return r
-	// return r.AddRoute(schema, &Route{prefix: prefix, Handler: handler})
 }
 
 // Adds new route to the router ,
@@ -150,6 +150,7 @@ func (r *Router) dispatchGroup(g func(*Router)) error {
 
 func (r *Router) dispatchHandler(route *Route) error {
 	ctx := getContext(r.arguments[1:])
+	route.path = strings.Join(r.arguments, " ")
 	err := route.match(ctx)
 
 	if err != nil {

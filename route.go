@@ -8,6 +8,7 @@ import (
 
 type Route struct {
 	schema  string
+	path    string
 	regex   string
 	prefix  string
 	Flags   []string
@@ -38,6 +39,22 @@ func (r *Route) match(c *Context) error {
 
 	if err != nil {
 		return err
+	}
+
+	err = r.matchSchema(c)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+func (r *Route) matchSchema(c *Context) error {
+
+	if !regexp.MustCompile(r.regex).MatchString(r.path) {
+		return RouteErr{
+			message: fmt.Sprintf("Usage :  %s", r.schema),
+		}
 	}
 
 	return nil
@@ -136,12 +153,12 @@ func (r *Route) splitUp(schema string) {
 		if strings.HasSuffix(s, "?") {
 			s = strings.TrimRight(s, "?")
 			r.vars[s] = ""
-			return `[^\s]*`
+			return `(\s+[^\s\-]+)?`
 		}
 
 		r.vars[s] = ""
 
-		return `[^\s]+`
+		return `(\s+[^\s\-]+)`
 	})
 
 	schema = regexp.MustCompile(`\[(\s*-{1,2}[A-z]+)+\]`).ReplaceAllStringFunc(schema, func(s string) string {
@@ -160,8 +177,10 @@ func (r *Route) splitUp(schema string) {
 			}
 		}
 
-		return `(\s*(` + strings.Join(parts, `|`) + `)+\s*)*`
+		return `(\s+(` + strings.Join(parts, `|`) + `)+)*`
 	})
+	schema = strings.ReplaceAll(schema, " ", "")
 
+	fmt.Println(schema)
 	r.regex = "^" + schema + "$"
 }
