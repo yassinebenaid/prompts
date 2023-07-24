@@ -1,7 +1,7 @@
 package goclitools
 
 import (
-	"errors"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -14,6 +14,14 @@ type Router struct {
 	fallback  func(*Context)
 	arguments []string
 	err       error
+}
+
+type RouterErr struct {
+	message string
+}
+
+func (e RouterErr) Error() string {
+	return e.message
 }
 
 // create new router instance
@@ -82,16 +90,16 @@ func (router *Router) Add(schema string, handler func(*Context)) *Router {
 //
 //	$ <PROGRAM_NAME> copy file
 //	$ <PROGRAM_NAME> copy dir
-func (r *Router) Group(prefix string, handler func(*Router)) *Router {
+func (router *Router) Group(prefix string, handler func(*Router)) *Router {
 	prefix = strings.TrimSpace(prefix)
 
 	if !validPrefix(prefix) {
-		r.err = errors.New("router error : invalid group prefix [" + prefix + "] , it should match [A-z0-9\\-\\_]")
+		router.err = router.error("router error : invalid group prefix [%s] , it should match [A-z0-9\\-\\_]", prefix)
 	} else {
-		r.groups[prefix] = handler
+		router.groups[prefix] = handler
 	}
 
-	return r
+	return router
 }
 
 // Adds a fallback route to the router ,
@@ -109,52 +117,52 @@ func (r *Router) Fallback(fallback func(*Context)) *Router {
 // this function should be called lastely , after its first call, the router become useless
 //
 // this function is useless within groups , so it won't do anything if you run it within a group
-func (r *Router) Dispatch() error {
-	if r.err != nil {
-		return r.err
+func (router *Router) Dispatch() error {
+	if router.err != nil {
+		return router.err
 	}
 
-	if r.ran {
+	if router.ran {
 		return nil
 	}
-	r.ran = true
+	router.ran = true
 
-	if len(r.arguments) < 1 {
-		r.fallback(getContext(r.arguments, []string{}))
+	if len(router.arguments) < 1 {
+		router.fallback(getContext(router.arguments, []string{}))
 		return nil
 	}
 
-	g, ok := r.groups[r.arguments[0]]
+	g, ok := router.groups[router.arguments[0]]
 
 	if ok {
-		return r.dispatchGroup(g)
+		return router.dispatchGroup(g)
 	}
 
-	route, ok := r.routes[r.arguments[0]]
+	route, ok := router.routes[router.arguments[0]]
 
 	if ok {
-		return r.dispatchHandler(route)
+		return router.dispatchHandler(route)
 	}
 
-	if r.fallback != nil {
-		r.fallback(getContext(r.arguments, []string{}))
+	if router.fallback != nil {
+		router.fallback(getContext(router.arguments, []string{}))
 		return nil
 	}
 
-	return errors.New("undefined command : " + r.arguments[0])
+	return router.error("undefined command : %s", router.arguments[0])
 }
 
-func (r *Router) dispatchGroup(g func(*Router)) error {
-	r2 := &Router{
+func (router *Router) dispatchGroup(group func(*Router)) error {
+	subrouter := &Router{
 		ran:       true,
 		routes:    make(map[string]*Route),
 		groups:    make(map[string]func(*Router)),
 		fallback:  func(*Context) {},
-		arguments: r.arguments[1:],
+		arguments: router.arguments[1:],
 	}
-	g(r2)
-	r2.ran = false
-	return r2.Dispatch()
+	group(subrouter)
+	subrouter.ran = false
+	return subrouter.Dispatch()
 }
 
 func (r *Router) dispatchHandler(route *Route) error {
@@ -168,6 +176,12 @@ func (r *Router) dispatchHandler(route *Route) error {
 
 	route.handler(ctx)
 	return nil
+}
+
+func (router *Router) error(err string, args ...any) error {
+	return RouterErr{
+		message: fmt.Sprintf(err, args...),
+	}
 }
 
 func validPrefix(p string) bool {

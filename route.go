@@ -129,7 +129,7 @@ func (route *Route) parseSchema(schema string) error {
 }
 
 func validSchema(schema string) bool {
-	rx := regexp.MustCompile(`^[a-z0-9]+(\s+\{[a-z\_]+\})*(\s+\[-{1,2}[A-z\-]+(\s-{1,2}[A-z\-]+)*\])*(\s+\{[a-z\_]+\??\})*$`)
+	rx := regexp.MustCompile(`^[a-z0-9]+(\s+\<[a-z\_]+\>)*(\s+\[-{1,2}[A-z\-]+(\s-{1,2}[A-z\-]+)*\])*(\s+\<[a-z\_]+\??\>)*$`)
 
 	return rx.MatchString(schema)
 }
@@ -145,9 +145,9 @@ func (route *Route) splitUp(schema string) {
 		route.vars = make([]string, 0)
 	}
 
-	schema = regexp.MustCompile(`\{[a-z\_]+\??\}`).ReplaceAllStringFunc(schema, func(s string) string {
-		s = strings.TrimLeft(s, "{")
-		s = strings.TrimRight(s, "}")
+	schema = regexp.MustCompile(`\<[a-z\_]+\??\>`).ReplaceAllStringFunc(schema, func(s string) string {
+		s = strings.TrimLeft(s, "<")
+		s = strings.TrimRight(s, ">")
 
 		if strings.HasSuffix(s, "?") {
 			s = strings.TrimRight(s, "?")

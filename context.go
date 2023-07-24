@@ -37,7 +37,9 @@ func getContext(Args []string, vars []string) *Context {
 				ctx.LFlags[kv[0]] = ""
 			}
 		default:
-			ctx.Args[vars[k]] = i
+			if len(vars) > 0 {
+				ctx.Args[vars[k]] = i
+			}
 		}
 	}
 
