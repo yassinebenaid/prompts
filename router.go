@@ -185,7 +185,7 @@ func (router *Router) error(err string, args ...any) error {
 }
 
 func validPrefix(p string) bool {
-	rx := regexp.MustCompile(`^[A-z0-9\-]+$`)
+	rx := regexp.MustCompile(`^[A-z0-9\-:]+$`)
 	return rx.MatchString(p)
 }
 
