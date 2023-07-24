@@ -93,26 +93,26 @@ func WarningMessage(m string) {
 func PrintMessage(m string, s ...Style) {
 	t := theme(s...)
 
-	fmt.Print(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v")
+	fmt.Print(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v", Reset, Earase)
 }
 
 // Prints the message "m" in the specified style "s."
 // Perfect for long messages
 func SprintMessage(m string, s ...Style) string {
 	t := theme(s...)
-	return fmt.Sprint(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v")
+	return fmt.Sprint(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v", Reset, Earase)
 }
 
 // print the message "m" in the specified "r" "g" "b" background
 func PrintRGBMessage(m string, r int, g int, b int) {
 	t := fmt.Sprintf("\x1b[48;2;%d;%d;%dm", r, g, b)
-	fmt.Print(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v")
+	fmt.Print(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v", Reset, Earase)
 }
 
 // print the message "m" in the specified "r" "g" "b" background
 func SprintRGBMessage(m string, r int, g int, b int) string {
 	t := fmt.Sprintf("\x1b[48;2;%d;%d;%dm", r, g, b)
-	return fmt.Sprint(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v")
+	return fmt.Sprint(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v", Reset, Earase)
 }
 
 // Show a progress bar , this function should be called on a loop ,
