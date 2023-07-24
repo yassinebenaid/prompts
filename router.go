@@ -206,3 +206,21 @@ func formatFields(f []string) string {
 
 	return strings.TrimSpace(fields)
 }
+
+// this function helps you test the  router with hardcoded command string
+//
+// the cmd represents the command string you write in a terminal :
+//
+//	router.Add("model <path> <name>", func(ctx *goclitools.Context) {
+//		fmt.Println(ctx.GetArg("path"))
+//		fmt.Println(ctx.GetArg("name"))
+//	})
+//
+//	err := router.Test("model foo bar")
+//	if err != nil{
+//		panic(err)
+//	}
+func (router *Router) Test(cmd string) error {
+	router.arguments = strings.Fields(cmd)
+	return router.Dispatch()
+}
