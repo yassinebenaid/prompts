@@ -11,35 +11,29 @@ type Context struct {
 	Args   map[string]string
 }
 
-func getContext(Args []string, vars []string) *Context {
+func getContext(arguments []string, args_names []string) *Context {
 	var ctx = Context{
 		Flags:  make(map[string]int),
 		Args:   make(map[string]string),
 		LFlags: make(map[string]string),
 	}
 
-	flag := regexp.MustCompile(`^-[A-z0-9]+$`)
-	opt := regexp.MustCompile(`^--[a-z0-9\-]+(=[A-z0-9\-_]+)?$`)
+	args := make([]string, 0, len(arguments))
 
-	for k, i := range Args {
+	for _, i := range arguments {
 		switch true {
-		case flag.MatchString(i):
-			fs := strings.Split(strings.TrimPrefix(i, "-"), "")
-
-			for _, f := range fs {
-				ctx.Flags["-"+f] = ctx.Flags["-"+f] + 1
-			}
-		case opt.MatchString(i):
-			kv := strings.SplitN(i, "=", 2)
-			if len(kv) == 2 {
-				ctx.LFlags[kv[0]] = kv[1]
-			} else {
-				ctx.LFlags[kv[0]] = ""
-			}
+		case regexp.MustCompile(`^-[A-z0-9]+$`).MatchString(i):
+			ctx.loadFlags(i)
+		case regexp.MustCompile(`^--[a-z0-9\-]+(=[A-z0-9\-_]+)?$`).MatchString(i):
+			ctx.loadLFlags(i)
 		default:
-			if len(vars) > 0 {
-				ctx.Args[vars[k]] = i
-			}
+			args = append(args, i)
+		}
+	}
+
+	for k, v := range args {
+		if k < len(args_names) {
+			ctx.Args[args_names[k]] = v
 		}
 	}
 
@@ -88,9 +82,26 @@ func (r *Context) ScanLflag(l string, dst *string) {
 	*dst = r.LFlags[l]
 }
 
-// Get an argument by its index , or "" if doesn't exists
-//
-// this functions execluds the flags
+// Get an argument by its name , or empty string if the argument doesn't exists
 func (ctx *Context) GetArg(name string) string {
 	return ctx.Args[name]
+}
+
+func (ctx *Context) loadFlags(s string) {
+	s = strings.TrimPrefix(s, "-")
+	flags := strings.Split(s, "")
+
+	for _, f := range flags {
+		ctx.Flags["-"+f] = ctx.Flags["-"+f] + 1
+	}
+}
+
+func (ctx *Context) loadLFlags(s string) {
+	pair := strings.SplitN(s, "=", 2)
+
+	if len(pair) == 2 {
+		ctx.LFlags[pair[0]] = pair[1]
+	} else {
+		ctx.LFlags[pair[0]] = ""
+	}
 }
