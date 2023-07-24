@@ -11,10 +11,9 @@ type Route struct {
 	path    string
 	regex   string
 	prefix  string
-	Flags   []string
-	Args    int
-	vars    map[string]string
-	LFlags  []string
+	flags   []string
+	vars    []string
+	lflags  []string
 	Handler func(*Context)
 }
 
@@ -26,22 +25,22 @@ func (e RouteErr) Error() string {
 	return e.message
 }
 
-func (r *Route) match(c *Context) error {
+func (route *Route) match(ctx *Context) error {
 	var err error
 
-	err = r.matchFlags(c)
+	err = route.matchFlags(ctx)
 
 	if err != nil {
 		return err
 	}
 
-	err = r.matchLFlags(c)
+	err = route.matchLFlags(ctx)
 
 	if err != nil {
 		return err
 	}
 
-	err = r.matchSchema(c)
+	err = route.matchSchema()
 
 	if err != nil {
 		return err
@@ -49,26 +48,26 @@ func (r *Route) match(c *Context) error {
 
 	return nil
 }
-func (r *Route) matchSchema(c *Context) error {
+func (route *Route) matchSchema() error {
 
-	if !regexp.MustCompile(r.regex).MatchString(r.path) {
+	if !regexp.MustCompile(route.regex).MatchString(route.path) {
 		return RouteErr{
-			message: fmt.Sprintf("Usage :  %s", r.schema),
+			message: fmt.Sprintf("Usage :  %s", route.schema),
 		}
 	}
 
 	return nil
 }
 
-func (r *Route) matchFlags(c *Context) error {
-	if len(r.Flags) == 0 && len(c.Flags) != 0 {
+func (route *Route) matchFlags(c *Context) error {
+	if len(route.flags) == 0 && len(c.Flags) != 0 {
 		return RouteErr{
-			message: fmt.Sprintf("command [%s] does not expect flags,", r.prefix),
+			message: fmt.Sprintf("command [%s] does not expect flags,", route.prefix),
 		}
 	}
 
 	exists := func(f string) bool {
-		for _, f2 := range r.Flags {
+		for _, f2 := range route.flags {
 			if f == f2 {
 				return true
 			}
@@ -88,15 +87,15 @@ func (r *Route) matchFlags(c *Context) error {
 	return nil
 }
 
-func (r *Route) matchLFlags(c *Context) error {
-	if len(r.LFlags) == 0 && len(c.LFlags) != 0 {
+func (route *Route) matchLFlags(ctx *Context) error {
+	if len(route.lflags) == 0 && len(ctx.LFlags) != 0 {
 		return RouteErr{
-			message: fmt.Sprintf("command [%s] does not expect flags,", r.prefix),
+			message: fmt.Sprintf("command [%s] does not expect flags,", route.prefix),
 		}
 	}
 
 	exists := func(f string) bool {
-		for _, f2 := range r.LFlags {
+		for _, f2 := range route.lflags {
 			if f == f2 {
 				return true
 			}
@@ -104,7 +103,7 @@ func (r *Route) matchLFlags(c *Context) error {
 		return false
 	}
 
-	for k := range c.LFlags {
+	for k := range ctx.LFlags {
 		if !exists(k) {
 			return RouteErr{
 				message: fmt.Sprintf("flag [%s] does not exists", k),
@@ -115,22 +114,22 @@ func (r *Route) matchLFlags(c *Context) error {
 	return nil
 }
 
-func (r *Route) parseSchema(schema string) error {
+func (route *Route) parseSchema(schema string) error {
 	schema = sanitize(schema)
 
 	if !validSchema(schema) {
 		return fmt.Errorf("incorrect schema syntax : %s", schema)
 	}
 
-	r.prefix = strings.SplitN(schema, " ", 2)[0]
-	r.schema = schema
-	r.splitUp(schema)
+	route.prefix = strings.SplitN(schema, " ", 2)[0]
+	route.schema = schema
+	route.splitUp(schema)
 
 	return nil
 }
 
 func validSchema(schema string) bool {
-	rx := regexp.MustCompile(`^[a-z0-9]+(\s+\{[a-z\_]+\??\})*(\s+\[-{1,2}[A-z\-]+(\s-{1,2}[A-z\-]+)*\])*(\s+\{[a-z\_]+\??\})*$`)
+	rx := regexp.MustCompile(`^[a-z0-9]+(\s+\{[a-z\_]+\})*(\s+\[-{1,2}[A-z\-]+(\s-{1,2}[A-z\-]+)*\])*(\s+\{[a-z\_]+\??\})*$`)
 
 	return rx.MatchString(schema)
 }
@@ -141,9 +140,9 @@ func sanitize(s string) string {
 	return s
 }
 
-func (r *Route) splitUp(schema string) {
-	if r.vars == nil {
-		r.vars = make(map[string]string)
+func (route *Route) splitUp(schema string) {
+	if route.vars == nil {
+		route.vars = make([]string, 0)
 	}
 
 	schema = regexp.MustCompile(`\{[a-z\_]+\??\}`).ReplaceAllStringFunc(schema, func(s string) string {
@@ -152,11 +151,11 @@ func (r *Route) splitUp(schema string) {
 
 		if strings.HasSuffix(s, "?") {
 			s = strings.TrimRight(s, "?")
-			r.vars[s] = ""
+			route.vars = append(route.vars, s)
 			return `(\s+[^\s\-]+)?`
 		}
 
-		r.vars[s] = ""
+		route.vars = append(route.vars, s)
 
 		return `(\s+[^\s\-]+)`
 	})
@@ -169,10 +168,10 @@ func (r *Route) splitUp(schema string) {
 
 		for _, f := range fields {
 			if strings.HasPrefix(f, "--") {
-				r.LFlags = append(r.LFlags, f)
+				route.lflags = append(route.lflags, f)
 				parts = append(parts, f+`(=[^\s=]+)?`)
 			} else {
-				r.Flags = append(r.Flags, f)
+				route.flags = append(route.flags, f)
 				parts = append(parts, f)
 			}
 		}
@@ -181,6 +180,5 @@ func (r *Route) splitUp(schema string) {
 	})
 	schema = strings.ReplaceAll(schema, " ", "")
 
-	fmt.Println(schema)
-	r.regex = "^" + schema + "$"
+	route.regex = "^" + schema + "$"
 }

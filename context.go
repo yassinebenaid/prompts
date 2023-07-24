@@ -8,20 +8,20 @@ import (
 type Context struct {
 	Flags  map[string]int
 	LFlags map[string]string
-	Args   []string
+	Args   map[string]string
 }
 
-func getContext(Args []string) *Context {
+func getContext(Args []string, vars []string) *Context {
 	var ctx = Context{
 		Flags:  make(map[string]int),
-		Args:   make([]string, 0, len(Args)),
+		Args:   make(map[string]string),
 		LFlags: make(map[string]string),
 	}
 
 	flag := regexp.MustCompile(`^-[A-z0-9]+$`)
 	opt := regexp.MustCompile(`^--[a-z0-9\-]+(=[A-z0-9\-_]+)?$`)
 
-	for _, i := range Args {
+	for k, i := range Args {
 		switch true {
 		case flag.MatchString(i):
 			fs := strings.Split(strings.TrimPrefix(i, "-"), "")
@@ -37,7 +37,7 @@ func getContext(Args []string) *Context {
 				ctx.LFlags[kv[0]] = ""
 			}
 		default:
-			ctx.Args = append(ctx.Args, i)
+			ctx.Args[vars[k]] = i
 		}
 	}
 
@@ -89,11 +89,6 @@ func (r *Context) ScanLflag(l string, dst *string) {
 // Get an argument by its index , or "" if doesn't exists
 //
 // this functions execluds the flags
-func (r *Context) GetArg(index int) string {
-
-	if len(r.Args) < index || index < 1 {
-		return ""
-	}
-
-	return r.Args[index-1]
+func (ctx *Context) GetArg(name string) string {
+	return ctx.Args[name]
 }

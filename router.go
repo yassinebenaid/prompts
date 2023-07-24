@@ -111,7 +111,7 @@ func (r *Router) Dispatch() error {
 	r.ran = true
 
 	if len(r.arguments) < 1 {
-		r.fallback(getContext(r.arguments))
+		r.fallback(getContext(r.arguments, []string{}))
 		return nil
 	}
 
@@ -128,7 +128,7 @@ func (r *Router) Dispatch() error {
 	}
 
 	if r.fallback != nil {
-		r.fallback(getContext(r.arguments))
+		r.fallback(getContext(r.arguments, []string{}))
 		return nil
 	}
 
@@ -149,7 +149,7 @@ func (r *Router) dispatchGroup(g func(*Router)) error {
 }
 
 func (r *Router) dispatchHandler(route *Route) error {
-	ctx := getContext(r.arguments[1:])
+	ctx := getContext(r.arguments[1:], route.vars)
 	route.path = strings.Join(r.arguments, " ")
 	err := route.match(ctx)
 
