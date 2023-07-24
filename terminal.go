@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 
 	"golang.org/x/term"
 )
@@ -22,16 +24,34 @@ func ClearTrm(lines int) {
 	fmt.Print(Reset, "\r")
 }
 
-func Select(options map[int]string) int {
+// prompt the user to select between a list of options and return the selected key
+func Select(label string, options map[int]string) int {
 	if len(options) < 1 {
 		return 0
 	}
+	selected := -1
+	width := getTrmW()
 
-	selected := 0
+	fmt.Println()
+	Print(label+"\n\n", Tab, Bold)
 
-	pw, err := term.ReadPassword(int(os.Stdin.Fd()))
+	for k, v := range options {
+		value := Sprint(v + " ")
+		key := Sprint(fmt.Sprintf(" %d", k))
+		dmt := strings.Repeat(".", width-charWidth(value)-charWidth(key)-4)
+		dmt = Sprint(dmt, T_BrightBlack)
+		fmt.Println("  " + value + dmt + key)
+	}
 
-	fmt.Println(pw, err)
+	for selected == -1 {
+		ansr := prompt()
+		intansr, err := strconv.ParseInt(ansr, 10, 64)
+
+		if _, ok := options[int(intansr)]; err == nil && ok {
+			selected = int(intansr)
+		}
+	}
+
 	return selected
 }
 
