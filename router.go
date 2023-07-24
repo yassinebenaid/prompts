@@ -55,9 +55,9 @@ func NewRouter() *Router {
 //		// ...
 //	})
 //
-// to define the arguments , wrape them in a curly braces , you will use that name to retrieve them later
+// here is how to define the arguments ,  you will use those names to retrieve them later
 //
-//	router.Add("copy [-a --verbose] {source} {destination}",func(ctx *goclitools.Context){
+//	router.Add("copy [-a --verbose] <source> <destination>",func(ctx *goclitools.Context){
 //		// ...
 //	})
 func (router *Router) Add(schema string, handler func(*Context)) *Router {
