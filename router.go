@@ -19,59 +19,69 @@ type Router struct {
 // create new router instance
 func NewRouter() *Router {
 	return &Router{
-		ran:    false,
-		routes: make(map[string]*Route),
-		groups: make(map[string]func(*Router)),
-		fallback: func(*Context) {
-		},
+		ran:       false,
+		routes:    make(map[string]*Route),
+		groups:    make(map[string]func(*Router)),
+		fallback:  func(*Context) {},
 		arguments: os.Args[1:],
 		err:       nil,
 	}
 }
 
-// Adds new handler to the router ,
-// prefix is the first value after the program name ,
-// if Add called in a group , prefix is the first value after the group prefix
-func (r *Router) Add(schema string, handler func(*Context)) *Router {
-	route := Route{Handler: handler}
+// Add a new route ,
+// schema is the command name followed by its arguments and flags .
+//
+// for example :
+//
+//	router.Add("copy",func(ctx *goclitools.Context){
+//		// ...
+//	})
+//
+// you can run this command using
+//
+//	$ <PRORAM_NAME> copy
+//
+// you can also define the flags :
+//
+//	router.Add("copy [-a --verbose]",func(ctx *goclitools.Context){
+//		// ...
+//	})
+//
+// to define the arguments , wrape them in a curly braces , you will use that name to retrieve them later
+//
+//	router.Add("copy [-a --verbose] {source} {destination}",func(ctx *goclitools.Context){
+//		// ...
+//	})
+func (router *Router) Add(schema string, handler func(*Context)) *Router {
+	route := Route{handler: handler}
 
 	if err := route.parseSchema(schema); err != nil {
-		r.err = err
+		router.err = err
 	}
 
-	r.routes[route.prefix] = &route
-	return r
-}
-
-// Adds new route to the router ,
-// prefix is the first value after the program name ,
-// if Add called in a group , prefix is the first value after the group prefix
-func (r *Router) AddRoute(prefix string, route *Route) *Router {
-	prefix = strings.TrimSpace(prefix)
-
-	if !validPrefix(prefix) {
-		r.err = errors.New(" invalid prefix [" + prefix + "] , it should match [A-z0-9\\-\\_]")
-	} else {
-		if route.Handler == nil {
-			r.err = errors.New("handler cannot be nil for route [" + prefix + "]")
-		} else {
-			route.prefix = prefix
-			r.routes[prefix] = route
-		}
-	}
-
-	return r
+	router.routes[route.prefix] = &route
+	return router
 }
 
 // Adds new route group to the router ,
-// prefix is the first value after the program name ,
-// if Group called in a group , prefix is the first value after the current group prefix
-//
-// this function useful to group multiple routes under a single prefix
-//
-// for example `$ git origin ` has many sub routes (add,remove ...)
-//
+// prefix will be used to differentiate the group,
 // handler recieves a Router instance to register your sub routes
+//
+// this function useful to group multiple routes under a single prefix :
+//
+//	router.Group("copy",func(router *goclitools.Router){
+//		router.Add("file",func(ctx *goclitools.Context){
+//		    // ...
+//	    })
+//		router.Add("dir",func(ctx *goclitools.Context){
+//		    // ...
+//	    })
+//	})
+//
+// these commands can be invoked like
+//
+//	$ <PROGRAM_NAME> copy file
+//	$ <PROGRAM_NAME> copy dir
 func (r *Router) Group(prefix string, handler func(*Router)) *Router {
 	prefix = strings.TrimSpace(prefix)
 
@@ -86,7 +96,7 @@ func (r *Router) Group(prefix string, handler func(*Router)) *Router {
 
 // Adds a fallback route to the router ,
 //
-// handler will be invoked if no route match the current option
+// handler will be invoked if no command match the current program args
 func (r *Router) Fallback(fallback func(*Context)) *Router {
 	r.fallback = fallback
 	return r
@@ -94,12 +104,11 @@ func (r *Router) Fallback(fallback func(*Context)) *Router {
 
 // Dispatch the router, reads the process args and invoke the convenience handler
 //
-// if something went wrong , it returns why, or returns the error returned by the handler it self
+// if something went wrong , it returns why
 //
 // this function should be called lastely , after its first call, the router become useless
 //
-// if this function invoked within a group, it does nothing
-// but returns early, this gives the router the chance to read all routes correctly
+// this function is useless within groups , so it won't do anything if you run it within a group
 func (r *Router) Dispatch() error {
 	if r.err != nil {
 		return r.err
@@ -157,7 +166,7 @@ func (r *Router) dispatchHandler(route *Route) error {
 		return err
 	}
 
-	route.Handler(ctx)
+	route.handler(ctx)
 	return nil
 }
 

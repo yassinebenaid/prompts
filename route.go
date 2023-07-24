@@ -14,7 +14,7 @@ type Route struct {
 	flags   []string
 	vars    []string
 	lflags  []string
-	Handler func(*Context)
+	handler func(*Context)
 }
 
 type RouteErr struct {
