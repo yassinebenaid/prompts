@@ -222,5 +222,7 @@ func formatFields(f []string) string {
 //	}
 func (router *Router) Test(cmd string) error {
 	router.arguments = strings.Fields(cmd)
+	router.ran = false
+	router.err = nil
 	return router.Dispatch()
 }

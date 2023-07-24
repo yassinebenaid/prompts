@@ -118,7 +118,7 @@ func (route *Route) parseSchema(schema string) error {
 	schema = sanitize(schema)
 
 	if !validSchema(schema) {
-		return fmt.Errorf("incorrect schema syntax : %s", schema)
+		return RouterErr{fmt.Sprintf("incorrect schema syntax : %s", schema)}
 	}
 
 	route.prefix = strings.SplitN(schema, " ", 2)[0]
@@ -129,7 +129,7 @@ func (route *Route) parseSchema(schema string) error {
 }
 
 func validSchema(schema string) bool {
-	rx := regexp.MustCompile(`^[a-z0-9:]+(\s+\<[a-z\_]+\>)*(\s+\[-{1,2}[A-z\-]+(\s-{1,2}[A-z\-]+)*\])*(\s+\<[a-z\_]+\>)*(\s+\<[a-z\_]+\?\>)*$`)
+	rx := regexp.MustCompile(`^[a-z0-9\:]+(\s+\<[a-z\_]+\>)*(\s+\[-{1,2}[A-z\-]+(\s-{1,2}[A-z\-]+)*\])*(\s+\<[a-z\_]+\>)*(\s+\<[a-z\_]+\?\>)*$`)
 
 	return rx.MatchString(schema)
 }
