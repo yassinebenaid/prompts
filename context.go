@@ -82,6 +82,11 @@ func (r *Context) ScanLflag(l string, dst *string) {
 	*dst = r.LFlags[l]
 }
 
+// scan the argument arg to the variable pointed by dst
+func (r *Context) ScanArg(name string, dst *string) {
+	*dst = r.Args[name]
+}
+
 // Get an argument by its name , or empty string if the argument doesn't exists
 func (ctx *Context) GetArg(name string) string {
 	return ctx.Args[name]
