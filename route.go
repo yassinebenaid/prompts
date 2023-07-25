@@ -8,7 +8,6 @@ import (
 
 type Route struct {
 	schema  string
-	path    string
 	regex   string
 	prefix  string
 	flags   []string
