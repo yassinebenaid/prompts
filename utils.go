@@ -1,8 +1,11 @@
-// wind helps you build cli applications as soon as possible;
-// it provides you with bunch of pre built components you can use to intract with the terminal
+// wind helps you build cli applications by abstracting all terminal intractions in an easy to use
+// apis and let you focus on the core of your application where it takes care of accepting the inputs and returning the output
 //
-// it provides several components to format the output, give it custom styles
-// custom logger, router and deal with user input , all in one package
+// in other words , wind is the connection between your application and the terminal
+//
+// it provides several components to format the output and give it custom styles
+// , a router to structure the commands tree, components  for accepting  user input and a logger
+// that you can use to log errors in a nice styles
 package wind
 
 func mapKeys[TKey int | float64, TValue any](m map[TKey]TValue) []TKey {
