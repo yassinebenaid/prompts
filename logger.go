@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// this si the base interface for loggers
 type Logger interface {
 	Info(m string, args ...any)
 	Debug(m string, args ...any)
@@ -18,32 +19,58 @@ type Logger interface {
 	Error(m string, args ...any)
 }
 
+type LogLevel int
+
+const (
+	DebugLevel LogLevel = 0 + iota
+	WarnLevel
+	InfoLevel
+)
+
 type Log struct {
 	Writer     io.Writer
 	WithCaller bool
 	Format     string
+	Level      LogLevel
+	slc        bool
+}
+
+func (log *Log) silence(l LogLevel) {
+	switch true {
+	case log.Level == DebugLevel:
+		log.slc = false
+	case log.Level == WarnLevel && l >= WarnLevel:
+		log.slc = false
+	case log.Level == InfoLevel && l >= InfoLevel:
+		log.slc = false
+	default:
+		log.slc = true
+	}
 }
 
 func (log *Log) Info(m string, args ...any) {
+	log.silence(InfoLevel)
 	log.log(Sprint("INFO ", T_BrightCyan, Bold), m, args...)
 }
 
 func (log *Log) Debug(m string, args ...any) {
+	log.silence(DebugLevel)
 	log.log(Sprint("DEBUG", T_BrightMagenta, Bold), m, args...)
 
 }
 
 func (log *Log) Warn(m string, args ...any) {
+	log.silence(WarnLevel)
 	log.log(Sprint("WARN ", T_BrightYellow, Bold), m, args...)
-
 }
 
 func (log *Log) Error(m string, args ...any) {
+	log.silence(DebugLevel)
 	log.log(Sprint("ERROR", T_BrightRed, Bold), m, args...)
-
 }
 
 func (log *Log) Fatal(m string, args ...any) {
+	log.silence(DebugLevel)
 	label := SprintRGB("FATAL", 255, 0, 150)
 	log.log(Sprint(label, Bold), m, args...)
 	os.Exit(1)
@@ -62,7 +89,10 @@ func (log *Log) log(label string, m string, args ...any) {
 		caller = log.getfl()
 	}
 
-	fmt.Println(ts, label, caller, m, log.kvpair(args))
+	if !log.slc {
+		fmt.Println(ts, label, caller, m, log.kvpair(args))
+	}
+
 	if log.Writer != nil {
 		log.Writer.Write(log.sanitize(ts, label, caller, m, log.kvpair(args)))
 	}
