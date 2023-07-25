@@ -41,9 +41,7 @@ func NewRouter() *Router {
 //
 // for example :
 //
-//	router.Add("copy",func(ctx *wind.Context){
-//		// ...
-//	})
+//	router.Add("copy",handler)
 //
 // you can run this command using
 //
@@ -51,22 +49,22 @@ func NewRouter() *Router {
 //
 // you can also define the flags :
 //
-//	router.Add("copy [-a --verbose]",func(ctx *wind.Context){})
+//	router.Add("copy [-a --verbose]",handler)
 //
 // here is how to define the arguments ,  you will use those names to retrieve them later
 //
-//	router.Add("copy [-a --verbose] <source> <destination>",func(ctx *wind.Context){})
+//	router.Add("copy [-a --verbose] <source> <destination>",handler)
 //
 // you can make the arguments optional by adding "?" question mark at the end :
 //
-//	router.Add("copy [-a --verbose] <source> <destination?>",func(ctx *wind.Context){})
+//	router.Add("copy [-a --verbose] <source> <destination?>",handler)
 //
 // there is a rule here, all optional arguments must be after the required arguments
 //
 // also , keep in mind that the order you choose in the schema , is the order will be used to invoke the command
 // so this will throw an error :
 //
-//	router.Add("copy [-a --verbose] <source> <destination?>",func(ctx *wind.Context){})
+//	router.Add("copy [-a --verbose] <source> <destination?>",handler)
 //
 //	$<PROGRAM_NAME> copy somesource -a  // RouteErr
 //
