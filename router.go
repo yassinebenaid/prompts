@@ -178,7 +178,6 @@ func (router *Router) dispatchGroup(group func(*Router)) error {
 
 func (r *Router) dispatchHandler(route *Route) error {
 	ctx := getContext(r.arguments[1:], route.vars)
-	route.path = formatFields(r.arguments)
 	err := route.match(ctx)
 
 	if err != nil {
@@ -200,10 +199,11 @@ func validPrefix(p string) bool {
 	return rx.MatchString(p)
 }
 
-func formatFields(f []string) string {
+func formatFields(f string) string {
+	fs := strings.Fields(f)
 	var fields string
 
-	for _, v := range f {
+	for _, v := range fs {
 		fields += " " + regexp.MustCompile(`^-{1}[A-z]+$`).ReplaceAllStringFunc(v, func(s string) string {
 			tmp := strings.TrimLeft(s, "-")
 			s = ""

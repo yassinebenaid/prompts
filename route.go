@@ -36,15 +36,15 @@ func (route *Route) match(ctx *Context) error {
 		return err
 	}
 
-	if err = route.matchSchema(); err != nil {
+	if err = route.matchSchema(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (route *Route) matchSchema() error {
-	if !regexp.MustCompile(route.regex).MatchString(route.path) {
+func (route *Route) matchSchema(c *Context) error {
+	if !regexp.MustCompile(route.regex).MatchString(formatFields(route.prefix + " " + c.path)) {
 		return RouteErr{fmt.Sprintf("Usage :  %s", route.schema)}
 	}
 
@@ -135,12 +135,12 @@ func (route *Route) splitUp(schema string) {
 		if strings.HasSuffix(s, "?") {
 			s = strings.TrimRight(s, "?")
 			route.vars = append(route.vars, s)
-			return `(\s+[^\s\-]+)?`
+			return `(\s+` + delimiter + `[^` + delimiter + `]+` + delimiter + `)?`
 		}
 
 		route.vars = append(route.vars, s)
 
-		return `(\s+[^\s\-]+)`
+		return `(\s+` + delimiter + `[^` + delimiter + `]+` + delimiter + `)`
 	})
 
 	schema = regexp.MustCompile(`\[(\s*-{1,2}[A-z]+)+\]`).ReplaceAllStringFunc(schema, func(s string) string {

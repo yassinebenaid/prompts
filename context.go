@@ -5,7 +5,10 @@ import (
 	"strings"
 )
 
+const delimiter = `ç`
+
 type Context struct {
+	path   string
 	Flags  map[string]int
 	LFlags map[string]string
 	Args   map[string]string
@@ -20,16 +23,23 @@ func getContext(arguments []string, args_names []string) *Context {
 
 	args := make([]string, 0, len(arguments))
 
+	tmp := make([]string, 0, len(arguments))
+
 	for _, i := range arguments {
 		switch true {
 		case regexp.MustCompile(`^-[A-z0-9]+$`).MatchString(i):
 			ctx.loadFlags(i)
+			tmp = append(tmp, i)
 		case regexp.MustCompile(`^--[a-z0-9\-]+(=[A-z0-9\-_]+)?$`).MatchString(i):
 			ctx.loadLFlags(i)
+			tmp = append(tmp, i)
 		default:
 			args = append(args, i)
+			tmp = append(tmp, delimiter+i+delimiter)
 		}
 	}
+
+	ctx.path = strings.Join(tmp, " ")
 
 	for k, v := range args {
 		if k < len(args_names) {
