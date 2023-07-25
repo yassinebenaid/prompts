@@ -31,13 +31,13 @@ func Select(label string, options map[int]string) int {
 	}
 	selected := -1
 	width := getTrmW()
+	keys := quickSort[int](mapKeys[int](options))
 
-	fmt.Println()
-	Print(label+"\n\n", Tab, Bold)
+	Println(label+"\n", Tab, Bold)
 
-	for k, v := range options {
-		value := Sprint(v + " ")
-		key := Sprint(fmt.Sprintf(" %d", k))
+	for _, v := range keys {
+		value := Sprint(options[v] + " ")
+		key := Sprint(fmt.Sprintf(" %d", v))
 		dmt := strings.Repeat(".", width-charWidth(value)-charWidth(key)-4)
 		dmt = Sprint(dmt, T_BrightBlack)
 		fmt.Println("  " + value + dmt + key)

@@ -13,6 +13,12 @@ func Print(m string, s ...Style) {
 	fmt.Print(theme(s...), m, Reset)
 }
 
+// Prints the message "m" in the specified style "s." in a new line
+// Perfect for short messages
+func Println(m string, s ...Style) {
+	fmt.Print("\n", theme(s...), m, Reset, "\n")
+}
+
 // Return the message "m" in the specified style "s."
 // Perfect for short messages
 func Sprint(m string, s ...Style) string {
