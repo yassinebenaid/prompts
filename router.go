@@ -51,15 +51,28 @@ func NewRouter() *Router {
 //
 // you can also define the flags :
 //
-//	router.Add("copy [-a --verbose]",func(ctx *goclitools.Context){
-//		// ...
-//	})
+//	router.Add("copy [-a --verbose]",func(ctx *goclitools.Context){})
 //
 // here is how to define the arguments ,  you will use those names to retrieve them later
 //
-//	router.Add("copy [-a --verbose] <source> <destination>",func(ctx *goclitools.Context){
-//		// ...
-//	})
+//	router.Add("copy [-a --verbose] <source> <destination>",func(ctx *goclitools.Context){})
+//
+// you can make the arguments optional by adding "?" question mark at the end :
+//
+//	router.Add("copy [-a --verbose] <source> <destination?>",func(ctx *goclitools.Context){})
+//
+// there is a rule here, all optional arguments must be after the required arguments
+//
+// also , keep in mind that the order you choose in the schema , is the order will be used to invoke the command
+// so this will throw an error :
+//
+//	router.Add("copy [-a --verbose] <source> <destination?>",func(ctx *goclitools.Context){})
+//
+//	$<PROGRAM_NAME> copy somesource -a  // RouteErr
+//
+// this throws an error because the flag used after the source, but the order is important,
+//
+//	$ <PROGRAM_NAME> copy -a somesource  // Works!
 func (router *Router) Add(schema string, handler func(*Context)) *Router {
 	route := Route{handler: handler}
 
@@ -149,7 +162,7 @@ func (router *Router) Dispatch() error {
 		return nil
 	}
 
-	return router.error("undefined command : %s", router.arguments[0])
+	return RouteErr{message: "undefined command : " + router.arguments[0]}
 }
 
 func (router *Router) dispatchGroup(group func(*Router)) error {
@@ -185,7 +198,7 @@ func (router *Router) error(err string, args ...any) error {
 }
 
 func validPrefix(p string) bool {
-	rx := regexp.MustCompile(`^[A-z0-9\-:]+$`)
+	rx := regexp.MustCompile(`^[A-z0-9\:]+$`)
 	return rx.MatchString(p)
 }
 
