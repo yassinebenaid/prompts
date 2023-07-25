@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// this si the base interface for loggers
+// this is the base interface for all loggers
 type Logger interface {
 	Info(m string, args ...any)
 	Debug(m string, args ...any)
