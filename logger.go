@@ -21,6 +21,7 @@ type Logger interface {
 type Log struct {
 	Writer     io.Writer
 	WithCaller bool
+	Format     string
 }
 
 func (log *Log) Info(m string, args ...any) {
@@ -49,16 +50,21 @@ func (log *Log) Fatal(m string, args ...any) {
 }
 
 func (log *Log) log(label string, m string, args ...any) {
-	time := time.Now().Format(time.DateTime)
+	var ts string
+	if log.Format != "" {
+		ts = time.Now().Format(log.Format)
+	} else {
+		ts = time.Now().Format(time.DateTime)
+	}
 	caller := ""
 
 	if log.WithCaller {
 		caller = log.getfl()
 	}
 
-	fmt.Println(time, label, caller, m, log.kvpair(args))
+	fmt.Println(ts, label, caller, m, log.kvpair(args))
 	if log.Writer != nil {
-		log.Writer.Write(log.sanitize(time, label, caller, m, log.kvpair(args)))
+		log.Writer.Write(log.sanitize(ts, label, caller, m, log.kvpair(args)))
 	}
 }
 
