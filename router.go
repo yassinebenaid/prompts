@@ -1,4 +1,4 @@
-package goclitools
+package wind
 
 import (
 	"fmt"
@@ -41,7 +41,7 @@ func NewRouter() *Router {
 //
 // for example :
 //
-//	router.Add("copy",func(ctx *goclitools.Context){
+//	router.Add("copy",func(ctx *wind.Context){
 //		// ...
 //	})
 //
@@ -51,22 +51,22 @@ func NewRouter() *Router {
 //
 // you can also define the flags :
 //
-//	router.Add("copy [-a --verbose]",func(ctx *goclitools.Context){})
+//	router.Add("copy [-a --verbose]",func(ctx *wind.Context){})
 //
 // here is how to define the arguments ,  you will use those names to retrieve them later
 //
-//	router.Add("copy [-a --verbose] <source> <destination>",func(ctx *goclitools.Context){})
+//	router.Add("copy [-a --verbose] <source> <destination>",func(ctx *wind.Context){})
 //
 // you can make the arguments optional by adding "?" question mark at the end :
 //
-//	router.Add("copy [-a --verbose] <source> <destination?>",func(ctx *goclitools.Context){})
+//	router.Add("copy [-a --verbose] <source> <destination?>",func(ctx *wind.Context){})
 //
 // there is a rule here, all optional arguments must be after the required arguments
 //
 // also , keep in mind that the order you choose in the schema , is the order will be used to invoke the command
 // so this will throw an error :
 //
-//	router.Add("copy [-a --verbose] <source> <destination?>",func(ctx *goclitools.Context){})
+//	router.Add("copy [-a --verbose] <source> <destination?>",func(ctx *wind.Context){})
 //
 //	$<PROGRAM_NAME> copy somesource -a  // RouteErr
 //
@@ -90,11 +90,11 @@ func (router *Router) Add(schema string, handler func(*Context)) *Router {
 //
 // this function useful to group multiple routes under a single prefix :
 //
-//	router.Group("copy",func(router *goclitools.Router){
-//		router.Add("file",func(ctx *goclitools.Context){
+//	router.Group("copy",func(router *wind.Router){
+//		router.Add("file",func(ctx *wind.Context){
 //		    // ...
 //	    })
-//		router.Add("dir",func(ctx *goclitools.Context){
+//		router.Add("dir",func(ctx *wind.Context){
 //		    // ...
 //	    })
 //	})
@@ -224,7 +224,7 @@ func formatFields(f []string) string {
 //
 // the cmd represents the command string you write in a terminal :
 //
-//	router.Add("model <path> <name>", func(ctx *goclitools.Context) {
+//	router.Add("model <path> <name>", func(ctx *wind.Context) {
 //		fmt.Println(ctx.GetArg("path"))
 //		fmt.Println(ctx.GetArg("name"))
 //	})

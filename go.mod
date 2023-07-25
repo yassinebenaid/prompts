@@ -1,4 +1,4 @@
-module github.com/yassinebenaid/goclitools
+module github.com/yassinebenaid/wind
 
 go 1.20
 

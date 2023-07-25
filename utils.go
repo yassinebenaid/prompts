@@ -1,4 +1,4 @@
-package goclitools
+package wind
 
 func mapKeys[TKey int | float64, TValue any](m map[TKey]TValue) []TKey {
 	keys := []TKey{}

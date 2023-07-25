@@ -1,4 +1,4 @@
-package goclitools
+package wind
 
 type Style string
 
