@@ -28,32 +28,24 @@ func (e RouteErr) Error() string {
 func (route *Route) match(ctx *Context) error {
 	var err error
 
-	err = route.matchFlags(ctx)
-
-	if err != nil {
+	if err = route.matchFlags(ctx); err != nil {
 		return err
 	}
 
-	err = route.matchLFlags(ctx)
-
-	if err != nil {
+	if err = route.matchLFlags(ctx); err != nil {
 		return err
 	}
 
-	err = route.matchSchema()
-
-	if err != nil {
+	if err = route.matchSchema(); err != nil {
 		return err
 	}
 
 	return nil
 }
-func (route *Route) matchSchema() error {
 
+func (route *Route) matchSchema() error {
 	if !regexp.MustCompile(route.regex).MatchString(route.path) {
-		return RouteErr{
-			message: fmt.Sprintf("Usage :  %s", route.schema),
-		}
+		return RouteErr{fmt.Sprintf("Usage :  %s", route.schema)}
 	}
 
 	return nil
@@ -61,9 +53,7 @@ func (route *Route) matchSchema() error {
 
 func (route *Route) matchFlags(c *Context) error {
 	if len(route.flags) == 0 && len(c.Flags) != 0 {
-		return RouteErr{
-			message: fmt.Sprintf("command [%s] does not expect flags,", route.prefix),
-		}
+		return RouteErr{fmt.Sprintf("Usage :  %s", route.schema)}
 	}
 
 	exists := func(f string) bool {
@@ -77,11 +67,8 @@ func (route *Route) matchFlags(c *Context) error {
 
 	for k := range c.Flags {
 		if !exists(k) {
-			return RouteErr{
-				message: fmt.Sprintf("flag [%s] does not exists", k),
-			}
+			return RouteErr{fmt.Sprintf("flag [%s] does not exists", k)}
 		}
-
 	}
 
 	return nil
@@ -89,9 +76,7 @@ func (route *Route) matchFlags(c *Context) error {
 
 func (route *Route) matchLFlags(ctx *Context) error {
 	if len(route.lflags) == 0 && len(ctx.LFlags) != 0 {
-		return RouteErr{
-			message: fmt.Sprintf("command [%s] does not expect flags,", route.prefix),
-		}
+		return RouteErr{fmt.Sprintf("Usage :  %s", route.schema)}
 	}
 
 	exists := func(f string) bool {
@@ -105,9 +90,7 @@ func (route *Route) matchLFlags(ctx *Context) error {
 
 	for k := range ctx.LFlags {
 		if !exists(k) {
-			return RouteErr{
-				message: fmt.Sprintf("flag [%s] does not exists", k),
-			}
+			return RouteErr{fmt.Sprintf("flag [%s] does not exists", k)}
 		}
 	}
 
