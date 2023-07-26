@@ -59,7 +59,7 @@ func NewRouter() *Router {
 //
 //	router.Add("copy [-a --verbose] <source> <destination?>",handler)
 //
-// there is a rule here, all optional arguments must be at the en after the required arguments and after the options
+// there is a rule here, all optional arguments must be at the en after the required arguments and after the flags
 //
 // also , keep in mind that the order you choose in the schema , is the order will be used to invoke the command
 // so this will throw an error :
@@ -177,7 +177,7 @@ func (router *Router) dispatchGroup(group func(*Router)) error {
 }
 
 func (r *Router) dispatchHandler(route *Route) error {
-	ctx := getContext(r.arguments[1:], route.vars)
+	ctx := getContext(r.arguments[1:], route.args)
 	err := route.match(ctx)
 
 	if err != nil {

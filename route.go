@@ -11,7 +11,7 @@ type Route struct {
 	regex   string
 	prefix  string
 	flags   []string
-	vars    []string
+	args    []string
 	lflags  []string
 	handler func(*Context)
 }
@@ -42,16 +42,16 @@ func (route *Route) match(ctx *Context) error {
 	return nil
 }
 
-func (route *Route) matchSchema(c *Context) error {
-	if !regexp.MustCompile(route.regex).MatchString(formatFields(route.prefix + " " + c.path)) {
+func (route *Route) matchSchema(ctx *Context) error {
+	if !regexp.MustCompile(route.regex).MatchString(formatFields(route.prefix + " " + ctx.path)) {
 		return RouteErr{fmt.Sprintf("Usage :  %s", route.schema)}
 	}
 
 	return nil
 }
 
-func (route *Route) matchFlags(c *Context) error {
-	if len(route.flags) == 0 && len(c.Flags) != 0 {
+func (route *Route) matchFlags(ctx *Context) error {
+	if len(route.flags) == 0 && len(ctx.Flags) != 0 {
 		return RouteErr{fmt.Sprintf("Usage :  %s", route.schema)}
 	}
 
@@ -64,7 +64,7 @@ func (route *Route) matchFlags(c *Context) error {
 		return false
 	}
 
-	for k := range c.Flags {
+	for k := range ctx.Flags {
 		if !exists(k) {
 			return RouteErr{fmt.Sprintf("flag [%s] does not exists", k)}
 		}
@@ -123,8 +123,8 @@ func sanitize(s string) string {
 }
 
 func (route *Route) splitUp(schema string) {
-	if route.vars == nil {
-		route.vars = make([]string, 0)
+	if route.args == nil {
+		route.args = make([]string, 0)
 	}
 
 	schema = regexp.MustCompile(`\<[a-z\_]+\??\>`).ReplaceAllStringFunc(schema, func(s string) string {
@@ -133,11 +133,11 @@ func (route *Route) splitUp(schema string) {
 
 		if strings.HasSuffix(s, "?") {
 			s = strings.TrimRight(s, "?")
-			route.vars = append(route.vars, s)
+			route.args = append(route.args, s)
 			return `(\s+` + delimiter + `[^` + delimiter + `]+` + delimiter + `)?`
 		}
 
-		route.vars = append(route.vars, s)
+		route.args = append(route.args, s)
 
 		return `(\s+` + delimiter + `[^` + delimiter + `]+` + delimiter + `)`
 	})

@@ -19,7 +19,7 @@ import (
 )
 
 // clear the terminal . lines represents how many line to earase ,
-// if lines = -1 clear all visible lines , like when you click CTRL+L
+// if lines <= -1 clear all visible lines , like when you click CTRL+L
 func ClearTrm(lines int) {
 	if lines < 0 {
 		lines = getTrmH()
@@ -183,6 +183,7 @@ func getTrmW() int {
 	w, _, _ := term.GetSize(int(os.Stdin.Fd()))
 	return w
 }
+
 func getTrmH() int {
 	_, h, _ := term.GetSize(int(os.Stdin.Fd()))
 	return h
