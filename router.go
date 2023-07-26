@@ -199,25 +199,6 @@ func validPrefix(p string) bool {
 	return rx.MatchString(p)
 }
 
-func formatFields(f string) string {
-	fs := strings.Fields(f)
-	var fields string
-
-	for _, v := range fs {
-		fields += " " + regexp.MustCompile(`^-{1}[A-z]+$`).ReplaceAllStringFunc(v, func(s string) string {
-			tmp := strings.TrimLeft(s, "-")
-			s = ""
-			for _, el := range tmp {
-				s += " -" + string(el)
-			}
-
-			return strings.TrimSpace(s)
-		})
-	}
-
-	return strings.TrimSpace(fields)
-}
-
 // this function helps you test the  router with hardcoded command string
 //
 // the cmd represents the command string you write in a terminal :
