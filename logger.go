@@ -10,15 +10,6 @@ import (
 	"time"
 )
 
-// this is the base interface for all loggers
-type Logger interface {
-	Info(m string, args ...any)
-	Debug(m string, args ...any)
-	Fatal(m string, args ...any)
-	Warn(m string, args ...any)
-	Error(m string, args ...any)
-}
-
 type LogLevel int
 
 const (
@@ -48,31 +39,51 @@ func (log *Log) silence(l LogLevel) {
 	}
 }
 
-func (log *Log) Info(m string, args ...any) {
+// log info message to the console and optionaly in the log file
+//
+// Info log messages regardless of log level
+func (log *Log) Info(m any, args ...any) {
 	log.silence(InfoLevel)
-	log.log(Sprint("INFO ", T_BrightCyan, Bold), m, args...)
+	ms := fmt.Sprintf("%s", m)
+	log.log(Sprint("INFO ", T_BrightCyan, Bold), ms, args...)
 }
 
-func (log *Log) Debug(m string, args ...any) {
+// log debug message to the console and optionaly in the log file
+//
+// debug log messages only of log level is DebugLevel
+func (log *Log) Debug(m any, args ...any) {
 	log.silence(DebugLevel)
-	log.log(Sprint("DEBUG", T_BrightMagenta, Bold), m, args...)
+	ms := fmt.Sprintf("%s", m)
+	log.log(Sprint("DEBUG", T_BrightMagenta, Bold), ms, args...)
 
 }
 
-func (log *Log) Warn(m string, args ...any) {
+// log warning message to the console and optionaly in the log file
+//
+// warn log messages only of log level is WarnLevel
+func (log *Log) Warn(m any, args ...any) {
 	log.silence(WarnLevel)
-	log.log(Sprint("WARN ", T_BrightYellow, Bold), m, args...)
+	ms := fmt.Sprintf("%s", m)
+	log.log(Sprint("WARN ", T_BrightYellow, Bold), ms, args...)
 }
 
-func (log *Log) Error(m string, args ...any) {
+// log error message to the console and optionaly in the log file
+//
+// Error log messages only of log level is DebugLevel
+func (log *Log) Error(m any, args ...any) {
 	log.silence(DebugLevel)
-	log.log(Sprint("ERROR", T_BrightRed, Bold), m, args...)
+	ms := fmt.Sprintf("%s", m)
+	log.log(Sprint("ERROR", T_BrightRed, Bold), ms, args...)
 }
 
-func (log *Log) Fatal(m string, args ...any) {
+// log fatal errors to the console and optionaly in the log file
+//
+// fatal log messages only of log level is DebugLevel
+func (log *Log) Fatal(m any, args ...any) {
 	log.silence(DebugLevel)
+	ms := fmt.Sprintf("%s", m)
 	label := SprintRGB("FATAL", 255, 0, 150)
-	log.log(Sprint(label, Bold), m, args...)
+	log.log(Sprint(label, Bold), ms, args...)
 	os.Exit(1)
 }
 
