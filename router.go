@@ -30,7 +30,6 @@ func NewRouter() *Router {
 		ran:       false,
 		routes:    make(map[string]*Route),
 		groups:    make(map[string]func(*Router)),
-		fallback:  func(*Context) {},
 		arguments: os.Args[1:],
 		err:       nil,
 	}
@@ -121,26 +120,38 @@ func (r *Router) Fallback(fallback func(*Context)) *Router {
 	return r
 }
 
-// Dispatch the router, reads the process args and invoke the convenience handler
+// Dispatch the router, reads the process args and invoke the handler accordingly
 //
-// if something went wrong , it returns why
+// if something went wrong , it returns why , and if no command match , suggestions will contain the most similar commands:
 //
-// this function should be called lastely , after its first call, the router become useless
+//		router.Add("print",handler)
+//		router.Add("sprint",handler)
 //
-// this function is useless within groups , so it won't do anything if you run it within a group
-func (router *Router) Dispatch() error {
+//		sugestions,err := router.Add("sprint",handler)
+//
+//		$ <PROGRAM_NAME> pr
+//
+//	 // err == RouteErr : undefined command pr
+//	 // suggestions == [print, sprint]
+//
+// this function should be called after all commands registered .
+// also it won't do anything if you run it within a group
+func (router *Router) Dispatch() (suggestions []string, err error) {
 	if router.err != nil {
-		return router.err
+		return nil, router.err
 	}
 
 	if router.ran {
-		return nil
+		return nil, nil
 	}
 	router.ran = true
 
 	if len(router.arguments) < 1 {
-		router.fallback(getContext(router.arguments, []string{}))
-		return nil
+		if router.fallback != nil {
+			router.fallback(getContext(router.arguments, []string{}))
+		}
+
+		return nil, nil
 	}
 
 	g, ok := router.groups[router.arguments[0]]
@@ -152,23 +163,22 @@ func (router *Router) Dispatch() error {
 	route, ok := router.routes[router.arguments[0]]
 
 	if ok {
-		return router.dispatchHandler(route)
+		return nil, router.dispatchHandler(route)
 	}
 
 	if router.fallback != nil {
 		router.fallback(getContext(router.arguments, []string{}))
-		return nil
+		return nil, nil
 	}
 
-	return RouteErr{message: "undefined command : " + router.arguments[0]}
+	return router.getSuggestions(router.arguments[0]), RouteErr{message: "undefined command : " + router.arguments[0]}
 }
 
-func (router *Router) dispatchGroup(group func(*Router)) error {
+func (router *Router) dispatchGroup(group func(*Router)) (suggestions []string, err error) {
 	subrouter := &Router{
 		ran:       true,
 		routes:    make(map[string]*Route),
 		groups:    make(map[string]func(*Router)),
-		fallback:  func(*Context) {},
 		arguments: router.arguments[1:],
 	}
 	group(subrouter)
@@ -194,6 +204,18 @@ func (router *Router) error(err string, args ...any) error {
 	}
 }
 
+func (router *Router) getSuggestions(cmd string) []string {
+	var sgs []string
+
+	for key := range router.routes {
+		if strings.Contains(key, cmd) {
+			sgs = append(sgs, key)
+		}
+	}
+
+	return sgs
+}
+
 func validPrefix(p string) bool {
 	rx := regexp.MustCompile(`^[A-z0-9\:]+$`)
 	return rx.MatchString(p)
@@ -212,7 +234,7 @@ func validPrefix(p string) bool {
 //	if err != nil{
 //		panic(err)
 //	}
-func (router *Router) Test(cmd string) error {
+func (router *Router) Test(cmd string) (suggestions []string, err error) {
 	router.arguments = strings.Fields(cmd)
 	router.ran = false
 	return router.Dispatch()

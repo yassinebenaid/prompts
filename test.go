@@ -59,7 +59,9 @@ func Test() {
 
 	for _, i := range cmds {
 		log.Info("running command : " + i)
-		if err := router.Test(i); err != nil {
+		_, err := router.Test(i)
+
+		if err != nil {
 			log.Fatal(err)
 		}
 	}
