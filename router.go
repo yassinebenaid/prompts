@@ -77,6 +77,10 @@ func (router *Router) Add(schema string, handler func(*Context)) *Router {
 		router.err = err
 	}
 
+	if !router.isUniquePrefix(route.prefix) {
+		router.err = RouterErr{"command " + route.prefix + " is not unique!"}
+	}
+
 	router.routes[route.prefix] = &route
 	return router
 }
@@ -219,6 +223,18 @@ func (router *Router) getSuggestions(cmd string) []string {
 func validPrefix(p string) bool {
 	rx := regexp.MustCompile(`^[A-z0-9\:]+$`)
 	return rx.MatchString(p)
+}
+
+func (router *Router) isUniquePrefix(p string) bool {
+	_, ok := router.routes[p]
+
+	if ok {
+		return false
+	}
+
+	_, ok = router.groups[p]
+
+	return !ok
 }
 
 // this function helps you test the  router with hardcoded command string
