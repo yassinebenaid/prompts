@@ -7,13 +7,14 @@ import (
 )
 
 type Route struct {
-	schema  string
-	regex   string
-	prefix  string
-	flags   []string
-	args    []string
-	lflags  []string
-	handler func(*Context)
+	schema      string
+	description string
+	regex       string
+	prefix      string
+	flags       []string
+	args        []string
+	lflags      []string
+	handler     func(*Context)
 }
 
 type RouteErr struct {
@@ -22,6 +23,18 @@ type RouteErr struct {
 
 func (e RouteErr) Error() string {
 	return e.message
+}
+
+func (route *Route) dispatch(args []string) error {
+	ctx := getContext(args, route.args)
+	err := route.match(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	route.handler(ctx)
+	return nil
 }
 
 func (route *Route) match(ctx *Context) error {
@@ -128,38 +141,13 @@ func (route *Route) splitUp(schema string) {
 	}
 
 	schema = regexp.MustCompile(`\<[a-z\_]+\??\>`).ReplaceAllStringFunc(schema, func(s string) string {
-		s = strings.TrimLeft(s, "<")
-		s = strings.TrimRight(s, ">")
-
-		if strings.HasSuffix(s, "?") {
-			s = strings.TrimRight(s, "?")
-			route.args = append(route.args, s)
-			return `(\s+` + delimiter + `[^` + delimiter + `]+` + delimiter + `)?`
-		}
-
-		route.args = append(route.args, s)
-
-		return `(\s+` + delimiter + `[^` + delimiter + `]+` + delimiter + `)`
+		return route.parseArg(s)
 	})
 
 	schema = regexp.MustCompile(`\[(\s*-{1,2}[A-z]+)+\]`).ReplaceAllStringFunc(schema, func(s string) string {
-		s = strings.TrimLeft(s, "[")
-		s = strings.TrimRight(s, "]")
-		fields := strings.Fields(s)
-		parts := make([]string, 0)
-
-		for _, f := range fields {
-			if strings.HasPrefix(f, "--") {
-				route.lflags = append(route.lflags, f)
-				parts = append(parts, f+`(=[^\s=]+)?`)
-			} else {
-				route.flags = append(route.flags, f)
-				parts = append(parts, f)
-			}
-		}
-
-		return `(\s+(` + strings.Join(parts, `|`) + `)+)*`
+		return route.parseFlags(s)
 	})
+
 	schema = strings.ReplaceAll(schema, " ", "")
 
 	route.regex = "^" + schema + "$"
@@ -182,4 +170,43 @@ func formatFields(f string) string {
 	}
 
 	return strings.TrimSpace(fields)
+}
+
+func (route *Route) Description(description string) *Route {
+	route.description = description
+	return route
+}
+
+func (route *Route) parseArg(arg string) string {
+	arg = strings.TrimLeft(arg, "<")
+	arg = strings.TrimRight(arg, ">")
+
+	if strings.HasSuffix(arg, "?") {
+		arg = strings.TrimRight(arg, "?")
+		route.args = append(route.args, arg)
+		return `(\s+` + delimiter + `[^` + delimiter + `]+` + delimiter + `)?`
+	}
+
+	route.args = append(route.args, arg)
+
+	return `(\s+` + delimiter + `[^` + delimiter + `]+` + delimiter + `)`
+}
+
+func (route *Route) parseFlags(flags string) string {
+	flags = strings.TrimLeft(flags, "[")
+	flags = strings.TrimRight(flags, "]")
+	fields := strings.Fields(flags)
+	parts := make([]string, 0)
+
+	for _, f := range fields {
+		if strings.HasPrefix(f, "--") {
+			route.lflags = append(route.lflags, f)
+			parts = append(parts, f+`(=[^\s=]+)?`)
+		} else {
+			route.flags = append(route.flags, f)
+			parts = append(parts, f)
+		}
+	}
+
+	return `(\s+(` + strings.Join(parts, `|`) + `)+)*`
 }

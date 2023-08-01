@@ -10,7 +10,7 @@ import (
 type Router struct {
 	ran       bool
 	routes    map[string]*Route
-	groups    map[string]func(*Router)
+	groups    map[string]*Group
 	fallback  func(*Context)
 	arguments []string
 	err       error
@@ -29,7 +29,7 @@ func NewRouter() *Router {
 	return &Router{
 		ran:       false,
 		routes:    make(map[string]*Route),
-		groups:    make(map[string]func(*Router)),
+		groups:    make(map[string]*Group),
 		arguments: os.Args[1:],
 		err:       nil,
 	}
@@ -70,8 +70,8 @@ func NewRouter() *Router {
 // this throws an error because the flag used after the source, but the order is important,
 //
 //	$ <PROGRAM_NAME> copy -a somesource  // Works!
-func (router *Router) Add(schema string, handler func(*Context)) *Router {
-	route := Route{handler: handler}
+func (router *Router) Add(schema string, handler func(*Context)) *Route {
+	route := &Route{handler: handler}
 
 	if err := route.parseSchema(schema); err != nil {
 		router.err = err
@@ -81,8 +81,8 @@ func (router *Router) Add(schema string, handler func(*Context)) *Router {
 		router.err = RouterErr{"command " + route.prefix + " is not unique!"}
 	}
 
-	router.routes[route.prefix] = &route
-	return router
+	router.routes[route.prefix] = route
+	return route
 }
 
 // Adds new route group to the router ,
@@ -104,16 +104,18 @@ func (router *Router) Add(schema string, handler func(*Context)) *Router {
 //
 //	$ <PROGRAM_NAME> copy file
 //	$ <PROGRAM_NAME> copy dir
-func (router *Router) Group(prefix string, handler func(*Router)) *Router {
+func (router *Router) Group(prefix string, handler func(*Router)) *Group {
 	prefix = strings.TrimSpace(prefix)
+	group := &Group{}
 
 	if !validPrefix(prefix) {
 		router.err = router.error("router error : invalid group prefix [%s] , it should match [A-z0-9\\-\\_]", prefix)
 	} else {
-		router.groups[prefix] = handler
+		group.handler = handler
+		router.groups[prefix] = group
 	}
 
-	return router
+	return group
 }
 
 // Adds a fallback route to the router ,
@@ -167,7 +169,7 @@ func (router *Router) Dispatch() (suggestions []string, err error) {
 	route, ok := router.routes[router.arguments[0]]
 
 	if ok {
-		return nil, router.dispatchHandler(route)
+		return nil, route.dispatch(router.arguments[1:])
 	}
 
 	if router.fallback != nil {
@@ -178,28 +180,16 @@ func (router *Router) Dispatch() (suggestions []string, err error) {
 	return router.getSuggestions(router.arguments[0]), RouteErr{message: "undefined command : " + router.arguments[0]}
 }
 
-func (router *Router) dispatchGroup(group func(*Router)) (suggestions []string, err error) {
+func (router *Router) dispatchGroup(group *Group) (suggestions []string, err error) {
 	subrouter := &Router{
 		ran:       true,
 		routes:    make(map[string]*Route),
-		groups:    make(map[string]func(*Router)),
+		groups:    make(map[string]*Group),
 		arguments: router.arguments[1:],
 	}
-	group(subrouter)
+	group.handler(subrouter)
 	subrouter.ran = false
 	return subrouter.Dispatch()
-}
-
-func (r *Router) dispatchHandler(route *Route) error {
-	ctx := getContext(r.arguments[1:], route.args)
-	err := route.match(ctx)
-
-	if err != nil {
-		return err
-	}
-
-	route.handler(ctx)
-	return nil
 }
 
 func (router *Router) error(err string, args ...any) error {
