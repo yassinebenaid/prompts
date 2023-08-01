@@ -1,9 +1,7 @@
 package wind
 
 import (
-	"fmt"
 	"os"
-	"regexp"
 	"strings"
 )
 
@@ -105,15 +103,18 @@ func (router *Router) Add(schema string, handler func(*Context)) *Route {
 //	$ <PROGRAM_NAME> copy file
 //	$ <PROGRAM_NAME> copy dir
 func (router *Router) Group(prefix string, handler func(*Router)) *Group {
-	prefix = strings.TrimSpace(prefix)
-	group := &Group{}
+	group := &Group{handler: handler}
 
-	if !validPrefix(prefix) {
-		router.err = router.error("router error : invalid group prefix [%s] , it should match [A-z0-9\\-\\_]", prefix)
-	} else {
-		group.handler = handler
-		router.groups[prefix] = group
+	if err := group.parsePrefix(prefix); err != nil {
+		router.err = err
+		return group
 	}
+
+	if !router.isUniquePrefix(group.prefix) {
+		router.err = RouterErr{"command " + group.prefix + " is not unique!"}
+	}
+
+	router.groups[group.prefix] = group
 
 	return group
 }
@@ -144,11 +145,11 @@ func (r *Router) Fallback(fallback func(*Context)) *Router {
 // also it won't do anything if you run it within a group
 func (router *Router) Dispatch() (suggestions []string, err error) {
 	if router.err != nil {
-		return nil, router.err
+		return []string{}, router.err
 	}
 
 	if router.ran {
-		return nil, nil
+		return []string{}, nil
 	}
 	router.ran = true
 
@@ -157,45 +158,28 @@ func (router *Router) Dispatch() (suggestions []string, err error) {
 			router.fallback(getContext(router.arguments, []string{}))
 		}
 
-		return nil, nil
+		return []string{}, nil
 	}
 
-	g, ok := router.groups[router.arguments[0]]
+	group, ok := router.groups[router.arguments[0]]
 
 	if ok {
-		return router.dispatchGroup(g)
+		return group.dispatch(router.arguments[1:])
 	}
 
 	route, ok := router.routes[router.arguments[0]]
 
 	if ok {
-		return nil, route.dispatch(router.arguments[1:])
+		return []string{}, route.dispatch(router.arguments[1:])
 	}
 
 	if router.fallback != nil {
 		router.fallback(getContext(router.arguments, []string{}))
-		return nil, nil
+		return []string{}, nil
 	}
 
-	return router.getSuggestions(router.arguments[0]), RouteErr{message: "undefined command : " + router.arguments[0]}
-}
-
-func (router *Router) dispatchGroup(group *Group) (suggestions []string, err error) {
-	subrouter := &Router{
-		ran:       true,
-		routes:    make(map[string]*Route),
-		groups:    make(map[string]*Group),
-		arguments: router.arguments[1:],
-	}
-	group.handler(subrouter)
-	subrouter.ran = false
-	return subrouter.Dispatch()
-}
-
-func (router *Router) error(err string, args ...any) error {
-	return RouterErr{
-		message: fmt.Sprintf(err, args...),
-	}
+	return router.getSuggestions(router.arguments[0]),
+		RouteErr{message: "undefined command : " + router.arguments[0]}
 }
 
 func (router *Router) getSuggestions(cmd string) []string {
@@ -210,11 +194,6 @@ func (router *Router) getSuggestions(cmd string) []string {
 	return sgs
 }
 
-func validPrefix(p string) bool {
-	rx := regexp.MustCompile(`^[A-z0-9\:]+$`)
-	return rx.MatchString(p)
-}
-
 func (router *Router) isUniquePrefix(p string) bool {
 	_, ok := router.routes[p]
 
@@ -225,23 +204,4 @@ func (router *Router) isUniquePrefix(p string) bool {
 	_, ok = router.groups[p]
 
 	return !ok
-}
-
-// this function helps you test the  router with hardcoded command string
-//
-// the cmd represents the command string you write in a terminal :
-//
-//	router.Add("model <path> <name>", func(ctx *wind.Context) {
-//		fmt.Println(ctx.GetArg("path"))
-//		fmt.Println(ctx.GetArg("name"))
-//	})
-//
-//	err := router.Test("model foo bar")
-//	if err != nil{
-//		panic(err)
-//	}
-func (router *Router) Test(cmd string) (suggestions []string, err error) {
-	router.arguments = strings.Fields(cmd)
-	router.ran = false
-	return router.Dispatch()
 }
