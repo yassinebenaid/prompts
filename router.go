@@ -1,11 +1,20 @@
 package wind
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
 
+type RouterConfig struct {
+	Name        string
+	Version     string
+	Description string
+	WithHelp    bool
+}
+
 type Router struct {
+	config    RouterConfig
 	ran       bool
 	routes    map[string]*Route
 	groups    map[string]*Group
@@ -23,14 +32,27 @@ func (e RouterErr) Error() string {
 }
 
 // create new router instance
-func NewRouter() *Router {
-	return &Router{
+func NewRouter(cfg RouterConfig) *Router {
+	router := &Router{
+		config:    cfg,
 		ran:       false,
 		routes:    make(map[string]*Route),
 		groups:    make(map[string]*Group),
 		arguments: os.Args[1:],
 		err:       nil,
 	}
+
+	if router.config.WithHelp {
+		router.Fallback(func(ctx *Context) {
+			Print(router.config.Name, Bold)
+			Println(router.config.Version, Tab)
+			Println(router.config.Description, Tab)
+			Println("\ncommands:")
+			router.displayHelp()
+		})
+	}
+
+	return router
 }
 
 // Add a new route ,
@@ -164,7 +186,7 @@ func (router *Router) Dispatch() (suggestions []string, err error) {
 	group, ok := router.groups[router.arguments[0]]
 
 	if ok {
-		return group.dispatch(router.arguments[1:])
+		return group.dispatch(router.arguments[1:], router.config.WithHelp)
 	}
 
 	route, ok := router.routes[router.arguments[0]]
@@ -204,4 +226,22 @@ func (router *Router) isUniquePrefix(p string) bool {
 	_, ok = router.groups[p]
 
 	return !ok
+}
+
+func (router *Router) displayHelp() {
+
+	var w int = getTrmW() / 5
+
+	for _, v := range router.routes {
+		Print(v.prefix, Tab, T_Green)
+		fmt.Print(strings.Repeat(" ", w-len(v.prefix)-2))
+		Println(v.description)
+	}
+
+	for _, g := range router.groups {
+		Print(g.prefix, Tab, T_Yellow)
+		fmt.Print(strings.Repeat(" ", w-len(g.prefix)-2))
+		Print(g.description + "\n")
+	}
+
 }
