@@ -106,7 +106,7 @@ func (s selectModel) View() string {
 	m += style().Foreground(color("#495867")).Render(strings.Repeat("─", getTrmW()-4))
 	m += style().Foreground(color("#495867")).Render("┘")
 	m += "\n"
-	m += style().Foreground(color("#495867")).Render(" Press enter to select and q to quit.")
+	m += style().Foreground(color("#444")).Render(" q quit   ⬩   ↵  select.")
 	m += "\n\n"
 	return m
 }
