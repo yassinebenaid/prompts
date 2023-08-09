@@ -8,13 +8,13 @@ import (
 )
 
 type radioModel struct {
-	choices  []string
-	cursor   int
-	label    string
-	selected int
+	choices []string
+	cursor  int
+	label   string
+	checked int
 }
 
-// prompt user to select between choices , and return the selected indexes
+// prompt user to choose between choices , and return the checked indexe
 //
 // example :
 //
@@ -29,7 +29,7 @@ func RadioBox(label string, choices []string) (int, error) {
 
 	s := selected.(radioModel)
 
-	return s.getSelected(), err
+	return s.checked, err
 
 }
 
@@ -56,7 +56,7 @@ func (s radioModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				s.cursor = 0
 			}
 		case "enter", " ":
-			s.selected = s.cursor
+			s.checked = s.cursor
 		}
 
 	}
@@ -82,7 +82,7 @@ func (s radioModel) View() string {
 		}
 
 		checked := style().Foreground(color("#495867")).Render("○ ")
-		if s.selected == i {
+		if s.checked == i {
 			checked = style().Foreground(color("#07beb8")).Render("◉ ")
 		}
 
@@ -98,8 +98,4 @@ func (s radioModel) View() string {
 	m += style().Foreground(color("#495867")).Render(" Press enter to select and q to quit.")
 	m += "\n\n"
 	return m
-}
-
-func (s radioModel) getSelected() int {
-	return s.selected
 }
