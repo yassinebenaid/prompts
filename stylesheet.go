@@ -56,21 +56,15 @@ func Warning(m string) {
 //
 //	wind.Alert("WARNING", "#fca311", "hello world")
 func Alert(label string, color string, m string) {
-	label = lipgloss.NewStyle().
+	label = style().
 		Padding(0, 1, 0, 1).
 		Margin(0, 2, 0, 0).
 		Background(lipgloss.Color(color)).
 		Render(label)
 
-	fmt.Println(lipgloss.NewStyle().
+	fmt.Println(style().
 		Margin(1, 0, 1, 2).
 		Render(label + m))
-}
-
-// print the message "m" in the specified "r" "g" "b" color
-func PrintRGB(m string, r int, g int, b int) {
-	t := fmt.Sprintf("\x1b[38;2;%d;%d;%dm", r, g, b)
-	fmt.Print(t, m, Reset)
 }
 
 // print the message "m" in the specified "r" "g" "b" color
@@ -109,7 +103,7 @@ func WarningMessage(m string) {
 //
 //	wind.Message("hello world", "#fca311")
 func Message(m string, color string) {
-	fmt.Println(lipgloss.NewStyle().
+	fmt.Println(style().
 		Margin(1, 0, 1, 2).
 		Padding(1, 0, 1, 2).
 		Width(getTrmW() - 2).
