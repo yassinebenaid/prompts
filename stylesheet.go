@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 // Prints the message "m" in the specified style "s."
@@ -28,40 +30,41 @@ func Sprint(m string, s ...Style) string {
 // Prints the message "m" using the "INFO" theme for styling.
 // Perfect for short messages
 func Info(m string) {
-	Alert("INFO", m, BG_Blue)
+	Alert("INFO", "4", m)
 }
 
 // Prints the message "m" using the "ERROR" theme for styling.
 // Perfect for short messages
 func Error(m string) {
-	Alert("ERROR", m, BG_Red)
+	Alert("ERROR", "1", m)
 }
 
 // Prints m styled by SUCCESS theme
 func Success(m string) {
-	Alert("SUCCESS", m, BG_Green)
+	Alert("SUCCESS", "2", m)
 }
 
 // Prints the message "m" using the "WARNING" theme for styling.
 // Perfect for short messages
 func Warning(m string) {
-	Alert("WARNING", m, BG_BrightYellow)
+	Alert("WARNING", "#fca311", m)
 }
 
-// Prints the message "m" labeled by "label" with the specified styles "s."
-// The "label" will be formatted according to the provided styles,
-// enhancing its visual appearance.
-func Alert(label string, m string, s ...Style) {
-	t := string(Tab)
-	t += theme(s...)
+// Prints the alert "m" labeled by "label" with the specified color
+//
+// example  :
+//
+//	wind.Alert("WARNING", "#fca311", "hello world")
+func Alert(label string, color string, m string) {
+	label = style().
+		Padding(0, 1, 0, 1).
+		Margin(0, 2, 0, 0).
+		Background(lipgloss.Color(color)).
+		Render(label)
 
-	fmt.Print("\v", t, " ", label, " ", Reset, " ", m, "\v\n")
-}
-
-// print the message "m" in the specified "r" "g" "b" color
-func PrintRGB(m string, r int, g int, b int) {
-	t := fmt.Sprintf("\x1b[38;2;%d;%d;%dm", r, g, b)
-	fmt.Print(t, m, Reset)
+	fmt.Println(style().
+		Margin(1, 0, 1, 2).
+		Render(label + m))
 }
 
 // print the message "m" in the specified "r" "g" "b" color
@@ -73,52 +76,39 @@ func SprintRGB(m string, r int, g int, b int) string {
 // Prints the message "m" using the "INFO" theme for styling.
 // Perfect for long messages
 func InfoMessage(m string) {
-	PrintMessage(m, BG_Blue)
+	Message(m, "4")
 }
 
 // Prints the message "m" using the "ERROR" theme for styling.
 // Perfect for long messages
 func ErrorMessage(m string) {
-	PrintMessage(m, BG_Red)
+	Message(m, "2")
 }
 
 // Prints the message "m" using the "SUCCESS" theme for styling.
 // Perfect for long messages
 func SuccessMessage(m string) {
-	PrintMessage(m, BG_Green)
+	Message(m, "1")
 }
 
 // Prints the message "m" using the "WARNING" theme for styling.
 // Perfect for long messages
 func WarningMessage(m string) {
-	PrintMessage(m, BG_BrightYellow)
+	Message(m, "#fca311")
 }
 
-// Prints the message "m" in the specified style "s."
-// Perfect for long messages
-func PrintMessage(m string, s ...Style) {
-	t := theme(s...)
-
-	fmt.Print(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v", Reset, Earase)
-}
-
-// Prints the message "m" in the specified style "s."
-// Perfect for long messages
-func SprintMessage(m string, s ...Style) string {
-	t := theme(s...)
-	return fmt.Sprint(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v", Reset, Earase)
-}
-
-// print the message "m" in the specified "r" "g" "b" background
-func PrintRGBMessage(m string, r int, g int, b int) {
-	t := fmt.Sprintf("\x1b[48;2;%d;%d;%dm", r, g, b)
-	fmt.Print(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v", Reset, Earase)
-}
-
-// print the message "m" in the specified "r" "g" "b" background
-func SprintRGBMessage(m string, r int, g int, b int) string {
-	t := fmt.Sprintf("\x1b[48;2;%d;%d;%dm", r, g, b)
-	return fmt.Sprint(t, "\x1b[J\v", Tab, m, "\n", t, "\x1b[J\v", Reset, Earase)
+// Prints the message "m" labeled by "label" with the specified color
+//
+// example  :
+//
+//	wind.Message("hello world", "#fca311")
+func Message(m string, color string) {
+	fmt.Println(style().
+		Margin(1, 0, 1, 2).
+		Padding(1, 0, 1, 2).
+		Width(getTrmW() - 2).
+		Background(lipgloss.Color(color)).
+		Render(m))
 }
 
 // Show a progress bar , this function should be called on a loop ,

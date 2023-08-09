@@ -8,6 +8,8 @@
 // that you can use to log errors in a nice styles
 package wind
 
+import "github.com/charmbracelet/lipgloss"
+
 func mapKeys[TKey int | float64, TValue any](m map[TKey]TValue) []TKey {
 	keys := []TKey{}
 
@@ -41,4 +43,11 @@ func quickSort[TItem int | float64](s []TItem) []TItem {
 	sorted = append(sorted, quickSort[TItem](greater)...)
 
 	return sorted
+}
+
+func style() lipgloss.Style {
+	return lipgloss.NewStyle()
+}
+func color(c string) lipgloss.Color {
+	return lipgloss.Color(c)
 }
