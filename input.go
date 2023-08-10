@@ -1,20 +1,30 @@
 package wind
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type inputModel struct {
-	label string
-	err   error
-	input textinput.Model
-}
-
 type (
 	errMsg error
+
+	inputModel struct {
+		required  bool
+		validator func(value string) error
+		label     string
+		err       error
+		input     textinput.Model
+	}
+
+	InputOptions struct {
+		Label       string
+		Placeholder string
+		Required    bool
+		Validator   func(value string) error
+	}
 )
 
 // prompt user to select between choices , and return the selected indexes
@@ -22,70 +32,114 @@ type (
 // example :
 //
 //	wind.SelectBox("you are intersted at ", []string{"gaming", "coding"})
-func InputBox(label string) (string, error) {
-	ti := textinput.New()
-	ti.Focus()
-	ti.Prompt = ""
-	ti.CharLimit = 150
-	ti.Width = getTrmW() - 6
+func InputBox(options InputOptions) (string, error) {
+	input := getInput()
+	input.Placeholder = strings.TrimSpace(options.Placeholder)
 
-	res := tea.NewProgram(inputModel{
-		label: strings.TrimSpace(label),
-		input: ti,
+	result := tea.NewProgram(inputModel{
+		label:     strings.TrimSpace(options.Label),
+		required:  options.Required,
+		validator: options.Validator,
+		input:     input,
 	})
 
-	selected, err := res.Run()
+	model, err := result.Run()
 
-	s := selected.(inputModel)
+	m := model.(inputModel)
 
-	return s.input.Value(), err
+	return m.input.Value(), err
 
 }
 
-func (s inputModel) Init() tea.Cmd {
+func (model inputModel) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (s inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (model inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "enter", "ctrl+c", "q", "esc":
-			return s, tea.Quit
+		case "enter", "ctrl+c", "esc":
+			if model.validate() {
+				return model, tea.Quit
+			}
+			return model, nil
 		}
 	case errMsg:
-		s.err = msg
-		return s, nil
+		model.err = msg
+		return model, nil
 	}
 
 	var cmd tea.Cmd
-	s.input, cmd = s.input.Update(msg)
-	return s, cmd
+	model.input, cmd = model.input.Update(msg)
+
+	return model, cmd
 }
 
-func (s inputModel) View() string {
+func (model inputModel) View() string {
 
-	v := s.input.View()
+	v := model.input.View()
 	m := "\n"
 	m += style().Margin(0, 0, 0, 1).Foreground(color("#495867")).Render("┌─")
-	m += style().Margin(0, 1, 0, 1).Foreground(color("#07beb8")).Render(s.label)
-	m += style().Foreground(color("#495867")).Render(strings.Repeat("─", getTrmW()-charWidth(s.label)-7))
+
+	if len(model.label) > 0 {
+		model.label = " " + model.label + " "
+	}
+
+	m += style().Foreground(color("#07beb8")).Render(model.label)
+	m += style().Foreground(color("#495867")).Render(strings.Repeat("─", getTrmW()-charWidth(model.label)-5))
 	m += style().Foreground(color("#495867")).Render("┐")
 	m += "\n"
 
 	m += style().Foreground(color("#495867")).Render(" │")
 	m += v
-	// m += strings.Repeat(" ")
-	m += style().Foreground(color("#495867")).Render(" │")
 
-	m += strings.Repeat(" ", ((getTrmW() - 36) / 2))
-	m += style().Foreground(color("#495867")).Render(" │")
+	ph := model.input.Placeholder
+	if len(ph) > 0 {
+		if len(model.input.Value()) > 0 {
+			m += style().Foreground(color("#495867")).Render(" │")
+		} else {
+			m += strings.Repeat(" ", getTrmW()-6-len(ph))
+			m += style().Foreground(color("#495867")).Render(" │")
+		}
+	} else {
+		m += style().Foreground(color("#495867")).Render(" │")
+	}
 	m += "\n"
 	m += style().Foreground(color("#495867")).Render(" └")
 	m += style().Foreground(color("#495867")).Render(strings.Repeat("─", getTrmW()-4))
 	m += style().Foreground(color("#495867")).Render("┘")
 	m += "\n"
-	m += style().Foreground(color("#495867")).Render(" Press enter to quit.")
+
+	if model.err != nil {
+		m += style().Foreground(color("#fb8500")).Italic(true).Render(" ⚠  " + model.err.Error())
+	} else {
+		m += style().Foreground(color("#495867")).Render(" Press enter to quit.")
+	}
 	m += "\n\n"
 	return m
+}
+
+func getInput() textinput.Model {
+	textInput := textinput.New()
+	textInput.Focus()
+	textInput.Prompt = " "
+	textInput.CharLimit = 150
+	textInput.Width = getTrmW() - 7
+
+	return textInput
+}
+
+func (model *inputModel) validate() bool {
+	if model.required && model.input.Value() == "" {
+		model.err = fmt.Errorf("this field is required")
+		return false
+	}
+
+	if model.validator != nil {
+		model.err = model.validator(model.input.Value())
+		return model.err == nil
+	}
+
+	return true
 }
