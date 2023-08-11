@@ -1,6 +1,7 @@
 package wind
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
@@ -38,6 +39,10 @@ func NewRouter(cfg RouterConfig) *Router {
 		groups:    make(map[string]*Group),
 		arguments: os.Args[1:],
 	}
+
+	router.Add("help", func(ctx *Context) {
+		fmt.Println(routerHelp(router))
+	}).Description("display this help")
 
 	return router
 }
