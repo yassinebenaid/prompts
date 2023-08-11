@@ -17,9 +17,12 @@ type (
 		label     string
 		err       error
 		input     textinput.Model
+		value     string
+		secure    bool
 	}
 
 	InputOptions struct {
+		Secure      bool
 		Label       string
 		Placeholder string
 		Required    bool
@@ -41,13 +44,14 @@ func InputBox(options InputOptions) (string, error) {
 		required:  options.Required,
 		validator: options.Validator,
 		input:     input,
+		secure:    options.Secure,
 	})
 
 	model, err := result.Run()
 
 	m := model.(inputModel)
 
-	return m.input.Value(), err
+	return m.value, err
 
 }
 
@@ -56,6 +60,8 @@ func (model inputModel) Init() tea.Cmd {
 }
 
 func (model inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	model.value = model.input.Value()
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -78,6 +84,10 @@ func (model inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (model inputModel) View() string {
 
+	if model.secure && len(model.input.Value()) > 0 {
+		model.input.SetValue(strings.Repeat("⬩", len(model.input.Value())))
+	}
+
 	v := model.input.View()
 	m := "\n"
 	m += style().Margin(0, 0, 0, 1).Foreground(color("#495867")).Render("┌─")
@@ -96,7 +106,7 @@ func (model inputModel) View() string {
 
 	ph := model.input.Placeholder
 	if len(ph) > 0 {
-		if len(model.input.Value()) > 0 {
+		if len(model.value) > 0 {
 			m += style().Foreground(color("#495867")).Render(" │")
 		} else {
 			m += strings.Repeat(" ", getTrmW()-6-len(ph))
@@ -131,13 +141,13 @@ func getInput() textinput.Model {
 }
 
 func (model *inputModel) validate() bool {
-	if model.required && model.input.Value() == "" {
+	if model.required && model.value == "" {
 		model.err = fmt.Errorf("this field is required")
 		return false
 	}
 
 	if model.validator != nil {
-		model.err = model.validator(model.input.Value())
+		model.err = model.validator(model.value)
 		return model.err == nil
 	}
 

@@ -35,22 +35,14 @@ func (e RouterErr) Error() string {
 func NewRouter(cfg RouterConfig) *Router {
 	router := &Router{
 		config:    cfg,
-		ran:       false,
 		routes:    make(map[string]*Route),
 		groups:    make(map[string]*Group),
 		arguments: os.Args[1:],
-		err:       nil,
 	}
 
-	if router.config.WithHelp {
-		router.Fallback(func(ctx *Context) {
-			Print(router.config.Name, Bold)
-			Println(router.config.Version, Tab)
-			Println(router.config.Description, Tab)
-			Println("\ncommands:")
-			router.displayHelp()
-		})
-	}
+	router.Add("help", func(ctx *Context) {
+		fmt.Println(routerHelp(router))
+	}).Description("display this help")
 
 	return router
 }
@@ -66,15 +58,17 @@ func NewRouter(cfg RouterConfig) *Router {
 //
 //	$ <PRORAM_NAME> copy
 //
-// you can also define the flags :
+// you can also define the flags and arguments like the following :
 //
-//	router.Add("copy [-a --verbose]",handler)
+//	 flags :
 //
-// here is how to define the arguments ,  you will use those names to retrieve them later
+//		router.Add("copy [-a --verbose]",handler)
 //
-//	router.Add("copy [-a --verbose] <source> <destination>",handler)
+//	 arguments :
 //
-// you can make the arguments optional by adding "?" question mark at the end :
+//		router.Add("copy [-a --verbose] <source> <destination>",handler)
+//
+// you will use those names to retrieve them later , you can make the arguments optional by adding "?" question mark at the end :
 //
 //	router.Add("copy [-a --verbose] <source> <destination?>",handler)
 //
@@ -107,25 +101,19 @@ func (router *Router) Add(schema string, handler func(*Context)) *Route {
 
 // Adds new route group to the router ,
 // prefix will be used to differentiate the group,
-// handler recieves a Router instance to register your sub routes
 //
 // this function useful to group multiple routes under a single prefix :
 //
-//	router.Group("copy",func(router *wind.Router){
-//		router.Add("file",func(ctx *wind.Context){
-//		    // ...
-//	    })
-//		router.Add("dir",func(ctx *wind.Context){
-//		    // ...
-//	    })
-//	})
+//	group := router.Group("copy")
+//	group.Add("file",handler})
+//	group.Add("folder",handler})
 //
 // these commands can be invoked like
 //
 //	$ <PROGRAM_NAME> copy file
 //	$ <PROGRAM_NAME> copy dir
-func (router *Router) Group(prefix string, handler func(*Router)) *Group {
-	group := &Group{handler: handler}
+func (router *Router) Group(prefix string) *Group {
+	group := newGroup(router.config)
 
 	if err := group.parsePrefix(prefix); err != nil {
 		router.err = err
@@ -143,7 +131,7 @@ func (router *Router) Group(prefix string, handler func(*Router)) *Group {
 
 // Adds a fallback route to the router ,
 //
-// handler will be invoked if no command match the current program args
+// handler will be invoked if no command match the current program args or if the argument length is 0
 func (r *Router) Fallback(fallback func(*Context)) *Router {
 	r.fallback = fallback
 	return r
@@ -186,7 +174,7 @@ func (router *Router) Dispatch() (suggestions []string, err error) {
 	group, ok := router.groups[router.arguments[0]]
 
 	if ok {
-		return group.dispatch(router.arguments[1:], router.config.WithHelp)
+		return group.dispatch(router.arguments[1:])
 	}
 
 	route, ok := router.routes[router.arguments[0]]
@@ -205,43 +193,25 @@ func (router *Router) Dispatch() (suggestions []string, err error) {
 }
 
 func (router *Router) getSuggestions(cmd string) []string {
-	var sgs []string
+	var suggestions []string
 
 	for key := range router.routes {
 		if strings.Contains(key, cmd) {
-			sgs = append(sgs, key)
+			suggestions = append(suggestions, key)
 		}
 	}
 
-	return sgs
+	return suggestions
 }
 
-func (router *Router) isUniquePrefix(p string) bool {
-	_, ok := router.routes[p]
+func (router *Router) isUniquePrefix(prefix string) bool {
+	_, exists := router.routes[prefix]
 
-	if ok {
+	if exists {
 		return false
 	}
 
-	_, ok = router.groups[p]
+	_, exists = router.groups[prefix]
 
-	return !ok
-}
-
-func (router *Router) displayHelp() {
-
-	var w int = getTrmW() / 5
-
-	for _, v := range router.routes {
-		Print(v.prefix, Tab, T_Green)
-		fmt.Print(strings.Repeat(" ", w-len(v.prefix)-2))
-		Println(v.description)
-	}
-
-	for _, g := range router.groups {
-		Print(g.prefix, Tab, T_Yellow)
-		fmt.Print(strings.Repeat(" ", w-len(g.prefix)-2))
-		Print(g.description + "\n")
-	}
-
+	return !exists
 }

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-const delimiter = `➜`
+const delimiter = `╳`
 
 type Context struct {
 	path   string
