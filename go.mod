@@ -1,4 +1,4 @@
-module github.com/yassinebenaid/wind
+module github.com/yassinebenaid/prompts
 
 go 1.21
 

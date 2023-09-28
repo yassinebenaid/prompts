@@ -1,4 +1,4 @@
-package wind
+package prompts
 
 type Style string
 

@@ -1,4 +1,4 @@
-package wind
+package prompts
 
 import (
 	"errors"
@@ -54,7 +54,7 @@ func Warning(m string) {
 //
 // example  :
 //
-//	wind.Alert("WARNING", "#fca311", "hello world")
+//	prompts.Alert("WARNING", "#fca311", "hello world")
 func Alert(label string, color string, m string) {
 	label = style().
 		Padding(0, 1, 0, 1).
@@ -101,7 +101,7 @@ func WarningMessage(m string) {
 //
 // example  :
 //
-//	wind.Message("hello world", "#fca311")
+//	prompts.Message("hello world", "#fca311")
 func Message(m string, color string) {
 	fmt.Println(style().
 		Margin(1, 0, 1, 2).

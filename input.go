@@ -1,4 +1,4 @@
-package wind
+package prompts
 
 import (
 	"fmt"
@@ -12,13 +12,14 @@ type (
 	errMsg error
 
 	inputModel struct {
-		required  bool
-		validator func(value string) error
-		label     string
-		err       error
-		input     textinput.Model
-		value     string
-		secure    bool
+		required   bool
+		validator  func(value string) error
+		label      string
+		err        error
+		input      textinput.Model
+		value      string
+		secure     bool
+		terminated bool
 	}
 
 	InputOptions struct {
@@ -30,11 +31,17 @@ type (
 	}
 )
 
-// prompt user to select between choices , and return the selected indexes
+// prompt user to fill an input, it returns the user input string
 //
 // example :
 //
-//	wind.SelectBox("you are intersted at ", []string{"gaming", "coding"})
+//	prompts.InputBox(prompts.InputOptions {
+//	  Secure:       false,
+//	  Label: "what is your name?",
+//	  Placeholder : "what is your name",
+//	  Required :   true,
+//	  Validator:   func(value string)error { return nil},
+//	})
 func InputBox(options InputOptions) (string, error) {
 	input := getInput()
 	input.Placeholder = strings.TrimSpace(options.Placeholder)
@@ -67,6 +74,7 @@ func (model inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "enter", "ctrl+c", "esc":
 			if model.validate() {
+				model.terminated = true
 				return model, tea.Quit
 			}
 			return model, nil
@@ -123,7 +131,7 @@ func (model inputModel) View() string {
 
 	if model.err != nil {
 		m += style().Foreground(color("#fb8500")).Italic(true).Render(" ⚠  " + model.err.Error())
-	} else {
+	} else if !model.terminated {
 		m += style().Foreground(color("#495867")).Render(" Press enter to quit.")
 	}
 	m += "\n\n"
