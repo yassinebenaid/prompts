@@ -1,4 +1,4 @@
-package wind
+package prompts
 
 import (
 	"regexp"
@@ -33,7 +33,7 @@ func newGroup(cfg RouterConfig) *Group {
 //
 //	$ <PRORAM_NAME> copy file
 //
-// this function has the same usage as *wind.Router.Add()
+// this function has the same usage as *prompts.Router.Add()
 func (group *Group) Add(schema string, handler func(*Context)) *Route {
 	return group.handler.Add(schema, handler)
 }
@@ -41,7 +41,7 @@ func (group *Group) Add(schema string, handler func(*Context)) *Route {
 // Adds nested group to the current group ,
 // prefix will be used to differentiate the group,
 //
-// this function has the same usage as *wind.Router.Group():
+// this function has the same usage as *prompts.Router.Group():
 //
 //	group1 := router.Group("do")
 //	group2 := group.Group("print")

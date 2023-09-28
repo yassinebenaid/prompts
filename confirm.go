@@ -1,4 +1,4 @@
-package wind
+package prompts
 
 import (
 	"strings"
@@ -15,7 +15,7 @@ type confirmModel struct {
 //
 // example :
 //
-//	wind.SelectBox("you are intersted at ", []string{"gaming", "coding"})
+//	prompts.SelectBox("you are intersted at ", []string{"gaming", "coding"})
 func ConfirmBox(label string, def bool) (bool, error) {
 	res := tea.NewProgram(confirmModel{
 		label:     strings.TrimSpace(label),

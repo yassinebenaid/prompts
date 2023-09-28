@@ -1,4 +1,4 @@
-package wind
+package prompts
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ type radioModel struct {
 //
 // example :
 //
-//	wind.SelectBox("you are intersted at ", []string{"gaming", "coding"})
+//	prompts.SelectBox("you are intersted at ", []string{"gaming", "coding"})
 func RadioBox(label string, choices []string) (int, error) {
 	res := tea.NewProgram(radioModel{
 		choices: choices,

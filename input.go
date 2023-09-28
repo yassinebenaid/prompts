@@ -1,4 +1,4 @@
-package wind
+package prompts
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ type (
 //
 // example :
 //
-//	wind.SelectBox("you are intersted at ", []string{"gaming", "coding"})
+//	prompts.SelectBox("you are intersted at ", []string{"gaming", "coding"})
 func InputBox(options InputOptions) (string, error) {
 	input := getInput()
 	input.Placeholder = strings.TrimSpace(options.Placeholder)
