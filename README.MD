@@ -21,4 +21,4 @@ value, err := prompts.InputBox(prompts.InputOptions{
 ```
 
 - result
-  {{ later}}
+ 
