@@ -35,12 +35,17 @@ type (
 //
 // example :
 //
-//	prompts.InputBox(prompts.InputOptions {
-//	  Secure:       false,
-//	  Label: "what is your name?",
-//	  Placeholder : "what is your name",
-//	  Required :   true,
-//	  Validator:   func(value string)error { return nil},
+//	prompts.InputBox(prompts.InputOptions{
+//		Secure:      false, // hides the user input, very common for passwords
+//		Label:       "what is your name?",
+//		Placeholder: "what is your name",
+//		Required:    true,
+//		Validator: func(value string) error { // will be called when user submit, and returned error will be displayed to the user below the input
+//			if len(value) < 3 {
+//				return fmt.Errorf("minimum len is 3")
+//			}
+//			return nil
+//		},
 //	})
 func InputBox(options InputOptions) (string, error) {
 	input := getInput()
