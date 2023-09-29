@@ -137,6 +137,27 @@ if err != nil {
 fmt.Println("gender : ", value)
 ```
 
+### Alerts
+these are helper apis you can use for better alerts and messages.
+```go
+prompts.Info("Info alert")
+prompts.Error("Error alert")
+prompts.Warning("Warning alert")
+prompts.Success("Success alert")
+```
+
 - result
 
- ![Screencast from 09-29-2023 06_10_56 PM](https://github.com/yassinebenaid/prompts/assets/101285507/1369852e-05c8-456e-8009-7f80401c72b7)
+  ![image](https://github.com/yassinebenaid/prompts/assets/101285507/8cf6b58c-a5f4-476c-a622-bc95837beb2f)
+
+  
+```go
+prompts.InfoMessage("Info message")
+prompts.ErrorMessage("Error message")
+prompts.WarningMessage("Warning message")
+prompts.SuccessMessage("Success message")
+```
+
+- result
+
+![image](https://github.com/yassinebenaid/prompts/assets/101285507/d18f974d-4e2b-47d0-9148-63eef9d283df)
