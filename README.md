@@ -25,6 +25,14 @@ value, err := prompts.InputBox(prompts.InputOptions{
 		return nil
 	},
 })
+
+if err != nil{
+	log.Fatal(err)
+}
+
+fmt.Println("selected " + value)
 ```
 
 - result
+  
+![Screencast from 09-28-2023 08_00_26 PM](https://github.com/yassinebenaid/prompts/assets/101285507/5e4e8c68-5e6a-4cb1-8ca0-169203ca5f6c)
