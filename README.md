@@ -10,7 +10,7 @@ Build command line prompts with ease, prompts provides several apis to help you 
 
 The input api allows you to prompt the user for an input field , it returns the input value
 
-- usage:
+- **Usage**:
 
 ```go
 // [...]
@@ -35,15 +35,17 @@ if err != nil{
 fmt.Println("selected " + value)
 ```
 
-- result
+- **Result**:
 
 ![Screencast from 09-28-2023 08_00_26 PM](https://github.com/yassinebenaid/prompts/assets/101285507/5e4e8c68-5e6a-4cb1-8ca0-169203ca5f6c)
+
+#
 
 ### Password Input
 
 The password input api is just normal input but with `Secure` option set to `true` ,
 
-- usage:
+- **Usage**:
 
 ```go
 // [...]
@@ -68,16 +70,18 @@ if err != nil{
 fmt.Println("password : " + value)
 ```
 
-- result
+- **Result**:
   
   ![Screencast from 09-29-2023 09_59_36 AM (1)](https://github.com/yassinebenaid/prompts/assets/101285507/c3c54db1-5964-41b6-90c6-9f5614f28448)
 
+
+#
 
 ### Confirmation Input
 
 The confirmation api can be used to prompt the user for confirmation , it returns a boolean ,
 
-- usage:
+- **Usage**:
 
 ```go
 // [...]
@@ -92,15 +96,17 @@ if err != nil {
 fmt.Println("answer : ", value)
 ```
 
-- result
+- **Result**:
   
   ![Screencast from 09-29-2023 05_51_27 PM](https://github.com/yassinebenaid/prompts/assets/101285507/83536f0d-a551-4963-ae5e-66d9eff54d89)
+
+#
 
 ### Radio Input
 
 The radio api can be used to prompt the user to choose one of several options , it returns a the index number ,
 
-- usage:
+- **Usage**:
 
 ```go
 // [...]
@@ -115,16 +121,18 @@ if err != nil {
 fmt.Println("gender : ", genders[value])
 ```
 
-- result
+- **Result**:
 
    ![Screencast from 09-29-2023 06_01_03 PM](https://github.com/yassinebenaid/prompts/assets/101285507/bb264973-7112-4faa-a19d-c1bbc9fa1a1e)
 
+
+#
 
 ### Select Box
 
 The select box api can be used to prompt the user to choose between several options , it returns a slice of selected indexes,
 
-- usage:
+- **Usage**:
 
 ```go
 // [...]
@@ -138,6 +146,11 @@ if err != nil {
 
 fmt.Println("gender : ", value)
 ```
+- **Result**:
+
+  ![Screencast from 09-29-2023 06_10_56 PM](https://github.com/yassinebenaid/prompts/assets/101285507/00bdb1ae-6616-4253-a1fe-0c6c67b598c6)
+
+#
 
 ### Alerts
 these are helper apis you can use for better alerts and messages.
@@ -148,7 +161,7 @@ prompts.Warning("Warning alert")
 prompts.Success("Success alert")
 ```
 
-- result
+- **Result**: 
 
   ![image](https://github.com/yassinebenaid/prompts/assets/101285507/8cf6b58c-a5f4-476c-a622-bc95837beb2f)
 
@@ -159,7 +172,5 @@ prompts.ErrorMessage("Error message")
 prompts.WarningMessage("Warning message")
 prompts.SuccessMessage("Success message")
 ```
-
-- result
 
 ![image](https://github.com/yassinebenaid/prompts/assets/101285507/d18f974d-4e2b-47d0-9148-63eef9d283df)
