@@ -70,3 +70,26 @@ fmt.Println("password : " + value)
   
   ![Screencast from 09-29-2023 09_59_36 AM (1)](https://github.com/yassinebenaid/prompts/assets/101285507/c3c54db1-5964-41b6-90c6-9f5614f28448)
 
+
+### Confirmation Input
+
+The confirmation api can be used to prompt the user for confirmation , it returns a boolean ,
+
+- usage:
+
+```go
+// [...]
+
+const DEFAULT = true
+value, err := prompts.ConfirmBox("are you sure ?", DEFAULT)
+
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Println("answer : ", value)
+```
+
+- result
+  
+  ![Screencast from 09-29-2023 05_51_27 PM](https://github.com/yassinebenaid/prompts/assets/101285507/83536f0d-a551-4963-ae5e-66d9eff54d89)
