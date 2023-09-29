@@ -117,3 +117,26 @@ fmt.Println("gender : ", genders[value])
 
    ![Screencast from 09-29-2023 06_01_03 PM](https://github.com/yassinebenaid/prompts/assets/101285507/bb264973-7112-4faa-a19d-c1bbc9fa1a1e)
 
+
+### Select Box
+
+The select box api can be used to prompt the user to choose between several options , it returns a slice of selected indexes,
+
+- usage:
+
+```go
+// [...]
+
+hobbies := []string{"swimming", "coding", "gaming", "playing"}
+value, err := prompts.SelectBox("Choose your hobbies : ", hobbies)
+
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Println("gender : ", value)
+```
+
+- result
+
+ ![Screencast from 09-29-2023 06_10_56 PM](https://github.com/yassinebenaid/prompts/assets/101285507/1369852e-05c8-456e-8009-7f80401c72b7)
