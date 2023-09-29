@@ -2,6 +2,8 @@
 
 Build command line prompts with ease, prompts provides several apis to help you create intuitive TUI faster,
 
+ ![Screencast from 09-29-2023 05_51_27 PM](https://github.com/yassinebenaid/prompts/assets/101285507/83536f0d-a551-4963-ae5e-66d9eff54d89)
+
 ## API
 
 ### Input
