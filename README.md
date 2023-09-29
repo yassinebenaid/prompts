@@ -93,3 +93,27 @@ fmt.Println("answer : ", value)
 - result
   
   ![Screencast from 09-29-2023 05_51_27 PM](https://github.com/yassinebenaid/prompts/assets/101285507/83536f0d-a551-4963-ae5e-66d9eff54d89)
+
+### Radio Input
+
+The radio api can be used to prompt the user to choose one of several options , it returns a the index number ,
+
+- usage:
+
+```go
+// [...]
+
+genders := []string{"male", "female"}
+value, err := prompts.RadioBox("Choose your gender : ", genders)
+
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Println("gender : ", genders[value])
+```
+
+- result
+
+   ![Screencast from 09-29-2023 06_01_03 PM](https://github.com/yassinebenaid/prompts/assets/101285507/bb264973-7112-4faa-a19d-c1bbc9fa1a1e)
+
