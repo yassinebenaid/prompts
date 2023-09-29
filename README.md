@@ -39,7 +39,7 @@ fmt.Println("selected " + value)
 
 ### Password Input
 
-The password input api is just normal input but with `Secret` option set to `true` ,
+The password input api is just normal input but with `Secure` option set to `true` ,
 
 - usage:
 
