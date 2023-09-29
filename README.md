@@ -67,3 +67,6 @@ fmt.Println("password : " + value)
 ```
 
 - result
+  
+  ![Screencast from 09-29-2023 09_59_36 AM (1)](https://github.com/yassinebenaid/prompts/assets/101285507/c3c54db1-5964-41b6-90c6-9f5614f28448)
+
