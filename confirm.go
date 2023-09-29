@@ -11,11 +11,12 @@ type confirmModel struct {
 	confirmed bool
 }
 
-// prompt user to select between choices , and return the selected indexes
+// prompt the user for confirmation , it returns a boolean
 //
 // example :
 //
-//	prompts.SelectBox("you are intersted at ", []string{"gaming", "coding"})
+//	const DEFAULT = true
+//	prompts.ConfirmBox("are you sure ?", DEFAULT)
 func ConfirmBox(label string, def bool) (bool, error) {
 	res := tea.NewProgram(confirmModel{
 		label:     strings.TrimSpace(label),

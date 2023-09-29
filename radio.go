@@ -14,11 +14,11 @@ type radioModel struct {
 	checked int
 }
 
-// prompt user to choose between choices , and return the checked indexe
+// prompt user to choose one of several choices , and return the checked indexe
 //
 // example :
 //
-//	prompts.SelectBox("you are intersted at ", []string{"gaming", "coding"})
+//	prompts.RadioBox("you are intersted at ", []string{"gaming", "coding"})
 func RadioBox(label string, choices []string) (int, error) {
 	res := tea.NewProgram(radioModel{
 		choices: choices,

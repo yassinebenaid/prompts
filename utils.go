@@ -8,46 +8,22 @@
 // that you can use to log errors in a nice styles
 package prompts
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"os"
 
-func mapKeys[TKey int | float64, TValue any](m map[TKey]TValue) []TKey {
-	keys := []TKey{}
-
-	for k := range m {
-		keys = append(keys, k)
-	}
-
-	return keys
-}
-
-func quickSort[TItem int | float64](s []TItem) []TItem {
-	if len(s) <= 1 {
-		return s
-	}
-
-	pivot := s[0]
-	lower := []TItem{}
-	greater := []TItem{}
-
-	for _, item := range s {
-		if item < pivot {
-			lower = append(lower, item)
-		} else if item > pivot {
-			greater = append(greater, item)
-		}
-	}
-
-	sorted := []TItem{}
-	sorted = append(sorted, quickSort[TItem](lower)...)
-	sorted = append(sorted, pivot)
-	sorted = append(sorted, quickSort[TItem](greater)...)
-
-	return sorted
-}
+	"github.com/charmbracelet/lipgloss"
+	"golang.org/x/term"
+)
 
 func style() lipgloss.Style {
 	return lipgloss.NewStyle()
 }
+
 func color(c string) lipgloss.Color {
 	return lipgloss.Color(c)
+}
+
+func getTrmW() int {
+	w, _, _ := term.GetSize(int(os.Stdin.Fd()))
+	return w
 }
