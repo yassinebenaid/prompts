@@ -34,5 +34,36 @@ fmt.Println("selected " + value)
 ```
 
 - result
-  
+
 ![Screencast from 09-28-2023 08_00_26 PM](https://github.com/yassinebenaid/prompts/assets/101285507/5e4e8c68-5e6a-4cb1-8ca0-169203ca5f6c)
+
+### Password Input
+
+The password input api is just normal input but with `Secret` option set to `true` ,
+
+- usage:
+
+```go
+// [...]
+
+value, err := prompts.InputBox(prompts.InputOptions{
+	Secure:      true, // set password mode
+	Label:       "what is your password?",
+	Placeholder: "what is your password",
+	Required:    true,
+	Validator:   func(value string) error {// will be called when user submit, and returned error will be displayed to the user below the input
+		if len(value) < 3{
+			return fmt.Errorf("minimum len is 3")
+		}
+		return nil
+	},
+})
+
+if err != nil{
+	log.Fatal(err)
+}
+
+fmt.Println("password : " + value)
+```
+
+- result
