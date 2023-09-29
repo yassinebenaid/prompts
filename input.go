@@ -77,12 +77,14 @@ func (model inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "enter", "ctrl+c", "esc":
+		case "enter":
 			if model.validate() {
 				model.terminated = true
 				return model, tea.Quit
 			}
 			return model, nil
+		case "ctrl+c", "esc":
+			return model, tea.Quit
 		}
 	case errMsg:
 		model.err = msg
