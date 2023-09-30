@@ -161,9 +161,11 @@ prompts.Warning("Warning alert")
 prompts.Success("Success alert")
 ```
 
-- **Result**: 
+- **Result**:
+  
+![Screenshot from 2023-09-29 18-18-21](https://github.com/yassinebenaid/prompts/assets/101285507/d380f45b-4db4-4a9d-b4a2-8edf5f518579)
 
-  ![image](https://github.com/yassinebenaid/prompts/assets/101285507/8cf6b58c-a5f4-476c-a622-bc95837beb2f)
+
 
   
 ```go
