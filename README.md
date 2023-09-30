@@ -2,7 +2,8 @@
 
 Build command line prompts with ease, prompts provides several apis to help you create intuitive TUI faster,
 
- ![Screencast from 09-29-2023 05_51_27 PM](https://github.com/yassinebenaid/prompts/assets/101285507/83536f0d-a551-4963-ae5e-66d9eff54d89)
+ ![Screenshot from 2023-09-30 19-38-45](https://github.com/yassinebenaid/prompts/assets/101285507/7ef5edb3-b13c-4e64-b03d-74f627165982)
+
 
 ## API
 
@@ -37,7 +38,8 @@ fmt.Println("selected " + value)
 
 - **Result**:
 
-![Screencast from 09-28-2023 08_00_26 PM](https://github.com/yassinebenaid/prompts/assets/101285507/5e4e8c68-5e6a-4cb1-8ca0-169203ca5f6c)
+![image](https://github.com/yassinebenaid/prompts/assets/101285507/de482c92-7ab3-4a36-a68a-422f3f74de02)
+![image](https://github.com/yassinebenaid/prompts/assets/101285507/025942de-025d-4e5d-a476-172c3311cf5e)
 
 #
 
@@ -72,7 +74,7 @@ fmt.Println("password : " + value)
 
 - **Result**:
   
-  ![Screencast from 09-29-2023 09_59_36 AM (1)](https://github.com/yassinebenaid/prompts/assets/101285507/c3c54db1-5964-41b6-90c6-9f5614f28448)
+ ![image](https://github.com/yassinebenaid/prompts/assets/101285507/825f5688-9d55-4e2d-acf2-c5b308dfc4a5)
 
 
 #
@@ -97,14 +99,15 @@ fmt.Println("answer : ", value)
 ```
 
 - **Result**:
-  
-  ![Screencast from 09-29-2023 05_51_27 PM](https://github.com/yassinebenaid/prompts/assets/101285507/83536f0d-a551-4963-ae5e-66d9eff54d89)
+
+  ![image](https://github.com/yassinebenaid/prompts/assets/101285507/8a6c51cb-847d-415a-b11e-96cbf0a2beeb)
+
 
 #
 
 ### Radio Input
 
-The radio api can be used to prompt the user to choose one of several options , it returns a the index number ,
+The radio api can be used to prompt the user to choose one of several options , it returns a the index of the checked option ,
 
 - **Usage**:
 
@@ -123,14 +126,14 @@ fmt.Println("gender : ", genders[value])
 
 - **Result**:
 
-   ![Screencast from 09-29-2023 06_01_03 PM](https://github.com/yassinebenaid/prompts/assets/101285507/bb264973-7112-4faa-a19d-c1bbc9fa1a1e)
+  ![image](https://github.com/yassinebenaid/prompts/assets/101285507/52e82922-844c-4c3a-89b7-a9d8800cd5b0)
 
 
 #
 
 ### Select Box
 
-The select box api can be used to prompt the user to choose between several options , it returns a slice of selected indexes,
+The select box api can be used to prompt the user to choose between several options , it returns a slice of selected  indexes,
 
 - **Usage**:
 
@@ -148,7 +151,7 @@ fmt.Println("gender : ", value)
 ```
 - **Result**:
 
-  ![Screencast from 09-29-2023 06_10_56 PM](https://github.com/yassinebenaid/prompts/assets/101285507/00bdb1ae-6616-4253-a1fe-0c6c67b598c6)
+  ![image](https://github.com/yassinebenaid/prompts/assets/101285507/192424db-c9fe-480d-9f9b-4f8d6cdff56b)
 
 #
 
