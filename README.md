@@ -173,4 +173,4 @@ prompts.WarningMessage("Warning message")
 prompts.SuccessMessage("Success message")
 ```
 
-![image](https://github.com/yassinebenaid/prompts/assets/101285507/d18f974d-4e2b-47d0-9148-63eef9d283df)
+![Screenshot from 2023-09-29 18-19-17](https://github.com/yassinebenaid/prompts/assets/101285507/90fc7d67-f0fe-4608-9f57-b5a0852129f7)
