@@ -2,8 +2,13 @@
 
 Build command line prompts with ease, prompts provides several apis to help you create intuitive TUI faster,
 
- ![Screenshot from 2023-09-30 19-38-45](https://github.com/yassinebenaid/prompts/assets/101285507/7ef5edb3-b13c-4e64-b03d-74f627165982)
+![Screenshot from 2023-09-30 19-38-45](https://github.com/yassinebenaid/prompts/assets/101285507/7ef5edb3-b13c-4e64-b03d-74f627165982)
 
+## Installation
+
+```bash
+go get github.com/yassinebenaid/prompts
+```
 
 ## API
 
@@ -73,9 +78,8 @@ fmt.Println("password : " + value)
 ```
 
 - **Result**:
-  
- ![image](https://github.com/yassinebenaid/prompts/assets/101285507/825f5688-9d55-4e2d-acf2-c5b308dfc4a5)
 
+![image](https://github.com/yassinebenaid/prompts/assets/101285507/825f5688-9d55-4e2d-acf2-c5b308dfc4a5)
 
 #
 
@@ -102,7 +106,6 @@ fmt.Println("answer : ", value)
 
   ![image](https://github.com/yassinebenaid/prompts/assets/101285507/8a6c51cb-847d-415a-b11e-96cbf0a2beeb)
 
-
 #
 
 ### Radio Input
@@ -128,12 +131,11 @@ fmt.Println("gender : ", genders[value])
 
   ![image](https://github.com/yassinebenaid/prompts/assets/101285507/52e82922-844c-4c3a-89b7-a9d8800cd5b0)
 
-
 #
 
 ### Select Box
 
-The select box api can be used to prompt the user to choose between several options , it returns a slice of selected  indexes,
+The select box api can be used to prompt the user to choose between several options , it returns a slice of selected indexes,
 
 - **Usage**:
 
@@ -149,6 +151,7 @@ if err != nil {
 
 fmt.Println("gender : ", value)
 ```
+
 - **Result**:
 
   ![image](https://github.com/yassinebenaid/prompts/assets/101285507/192424db-c9fe-480d-9f9b-4f8d6cdff56b)
@@ -156,7 +159,9 @@ fmt.Println("gender : ", value)
 #
 
 ### Alerts
+
 these are helper apis you can use for better alerts and messages.
+
 ```go
 prompts.Info("Info alert")
 prompts.Error("Error alert")
@@ -165,12 +170,9 @@ prompts.Success("Success alert")
 ```
 
 - **Result**:
-  
+
 ![Screenshot from 2023-09-29 18-18-21](https://github.com/yassinebenaid/prompts/assets/101285507/d380f45b-4db4-4a9d-b4a2-8edf5f518579)
 
-
-
-  
 ```go
 prompts.InfoMessage("Info message")
 prompts.ErrorMessage("Error message")
