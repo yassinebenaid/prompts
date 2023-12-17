@@ -14,7 +14,7 @@ go get github.com/yassinebenaid/prompts
 
 ### Input
 
-The input api allows you to prompt the user for an input field , it returns the input value
+The input api allows you to prompt the user for an input , it returns the input value
 
 - **Usage**:
 
