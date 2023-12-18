@@ -1,6 +1,6 @@
 # Prompts
 
-Build command line prompts with ease, prompts provides several apis to help you create intuitive TUI faster,
+Build command line prompts with ease, prompts provides several TUI components to create intuitive CLI applications faster,
 
 ![Screenshot from 2023-09-30 19-38-45](https://github.com/yassinebenaid/prompts/assets/101285507/7ef5edb3-b13c-4e64-b03d-74f627165982)
 
